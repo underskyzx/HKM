@@ -27,6 +27,7 @@ public class Diagnose extends Activity {
     private CheckBox agentExists, agentCanExecute, cpuExists, cpuCanExecute, gpuExists,
             gpuCanExecute, miscExists, miscCanExecute, lcdExists, lcdCanExecute, touchExists,
             touchCanExecute, govExists, govCanExecute;
+    private TextView bootLog;
     private Button fix, recBoot;
     private String v = "#", bb = "BB";
     private Activity thisActivity;
@@ -58,7 +59,7 @@ public class Diagnose extends Activity {
         touchCanExecute = (CheckBox) findViewById(R.id.checkBox6b);
         govExists = (CheckBox) findViewById(R.id.checkBox7a);
         govCanExecute = (CheckBox) findViewById(R.id.checkBox7b);
-
+        bootLog = (TextView) findViewById(R.id.bootLog);
         fix = (Button) findViewById(R.id.fixButton);
         recBoot = (Button) findViewById(R.id.recBoot);
 
@@ -68,12 +69,15 @@ public class Diagnose extends Activity {
     public void onStart() {
         super.onStart();
         new AsyncTask<Void, Void, Void>() {
-            String s = null;
-            List<String> list1 = null
+            String s = "";
+            List<String>
+                    list1 = null
                     ,
                     list2 = null
                     ,
-                    list3 = null;
+                    list3 = null
+                    ,
+                    list4 = null;
 
             @Override
             protected Void doInBackground(Void... voids) {
@@ -84,8 +88,10 @@ public class Diagnose extends Activity {
                         "echo init.d:",
                         "cat /system/etc/init.d/*",
                         "echo scripts:",
-                        "cat " + scriptsDir + "/*",
-                        "echo HKM boot log:",
+                        "cat " + scriptsDir + "/*"
+                });
+                list4 = Shell.SH.run(new String[] {
+                        "echo Last boot log:",
                         "cat /sdcard/HKM.log"
                 });
                 return null;
@@ -117,9 +123,14 @@ public class Diagnose extends Activity {
                             p.println("\n## contents ##");
                             for (String ss : list3)
                                 p.println(ss);
+                            for (String ss : list4) {
+                                s = s + ss + "\n";
+                                p.println(ss);
+                            }
                         }
                         p.flush();
                         p.close();
+                        ((TextView) findViewById(R.id.bootLog)).setText(s);
                         new AlertDialog.Builder(thisActivity)
                                 .setMessage(getString(R.string.diagnosis_done)
                                         .replace("###", Environment.getExternalStorageDirectory() +
