@@ -84,7 +84,9 @@ public class Diagnose extends Activity {
                         "echo init.d:",
                         "cat /system/etc/init.d/*",
                         "echo scripts:",
-                        "cat " + scriptsDir + "/*"
+                        "cat " + scriptsDir + "/*",
+                        "echo HKM boot log:",
+                        "cat /sdcard/HKM.log"
                 });
                 return null;
             }
