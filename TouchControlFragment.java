@@ -41,7 +41,7 @@ public class TouchControlFragment extends Fragment {
             case R.id.action_refresh:
                 refreshAll();
                 return true;
-            case R.id.action_save:
+            case R.id.action_apply:
                 saveAll();
                 //create setOnBootFiles
                 if (setOnBoot.isChecked())

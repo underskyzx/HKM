@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
@@ -83,7 +82,8 @@ public class InfoTabFragment extends Fragment {
                     .setItems(items, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(links.get(i))));
+                            //activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(links.get(i))));
+                            downloadFile(activity, false, "mode2", links.get(i));
                         }
                     })
                     .show();
@@ -103,8 +103,8 @@ public class InfoTabFragment extends Fragment {
         }
     }
 
-    public static void downloadFile(Activity activity, boolean force) {
-        new fileDownloader(activity, force).execute();
+    public static void downloadFile(Activity activity, boolean force, String... args) {
+        new fileDownloader(activity, force, args[0]).execute(args);
     }
 
     @Override
@@ -158,6 +158,7 @@ public class InfoTabFragment extends Fragment {
         Button stable = (Button) view.findViewById(R.id.stable);
         Button test = (Button) view.findViewById(R.id.test);
         Button check = (Button) view.findViewById(R.id.check);
+        Button killDownloads = (Button) view.findViewById(R.id.killAllButton);
         stable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -207,7 +208,27 @@ public class InfoTabFragment extends Fragment {
                                         null)
                                 .build()
                 );
-                downloadFile(getActivity(), false);
+                downloadFile(getActivity(), false, "mode1");
+            }
+        });
+
+        // currently unused
+        killDownloads.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MyTools.toast(getActivity(), getString(R.string.toast_longPress_toUse));
+            }
+        });
+        // currently unused
+        killDownloads.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if (fileDownloader.killAll(getActivity())) {
+                    MyTools.toast(getActivity(), R.string.toast_done);
+                } else {
+                    MyTools.toast(getActivity(), "No downloads to terminate");
+                }
+                return true;
             }
         });
 

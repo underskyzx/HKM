@@ -49,7 +49,7 @@ public class GpuControlFragment extends Fragment {
             case R.id.action_refresh:
                 refreshAll();
                 return true;
-            case R.id.action_save:
+            case R.id.action_apply:
                 saveAll();
                 if (setOnBoot.isChecked())
                     prepareBootScript();

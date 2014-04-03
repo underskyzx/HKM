@@ -2,11 +2,16 @@ package com.themike10452.hellscorekernelmanager;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,89 +21,291 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class fileDownloader extends AsyncTask<Integer, Void, Boolean> {
+import eu.chainfire.libsuperuser.Shell;
 
+public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
+
+    private static Dialog dialog;
+    private static HttpURLConnection urlConnection;
+    private static boolean killedByMaster;
     private final Activity activity;
     private final boolean force;
+    private String mode;
     private ProgressDialog progressDialog;
 
-    fileDownloader(Activity activity, boolean arg) {
+    fileDownloader(Activity activity, boolean arg, String mode) {
+        killedByMaster = false;
         this.activity = activity;
         this.force = arg;
+        this.mode = mode;
+    }
+
+    public static boolean killAll(Activity act) {
+        if (urlConnection == null)
+            return false;
+        killedByMaster = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                urlConnection.disconnect();
+            }
+        }).start();
+
+        return (new File(Environment.getExternalStorageDirectory().getPath() +
+                File.separator + act.getString(R.string.kernel_download_location)))
+                .delete();
+    }
+
+    private static void finish(final Activity activity, boolean install) {
+        if (install) {
+            String recoveryDir = "/cache/recovery";
+            new AsyncTask<String, Void, Boolean>() {
+                @Override
+                protected Boolean doInBackground(String... strings) {
+                    try {
+                        // a dirty way to check if /cache/recovery exists
+                        Shell.SU.run("if [ -e " + strings[0] + " ];then echo iffoooo; fi").get(0);
+                    } catch (Exception e) {
+                        return false;
+                    }
+                    return true;
+                }
+
+                @Override
+                protected void onPostExecute(Boolean doIt) {
+                    if (doIt) {
+                        doIt(activity);
+                    } else {
+                        new AlertDialog.Builder(activity)
+                                .setMessage(activity.getString(R.string.kernelDownload_complete)
+                                        .replace("###",
+                                                Environment.getExternalStorageDirectory().getPath() +
+                                                        File.separator +
+                                                        activity.getString(R.string.kernel_download_location)
+                                        ))
+                                .setCancelable(true)
+                                .setTitle(activity.getString(R.string.toast_done))
+                                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                    @Override
+                                    public void onCancel(DialogInterface dialogInterface) {
+                                        MyTools.longToast(activity, R.string.toast_openRecovery_notSupported);
+                                    }
+                                })
+                                .show();
+                        return;
+                    }
+                }
+            }.execute(recoveryDir);
+        } else {
+            new AlertDialog.Builder(activity)
+                    .setMessage(activity.getString(R.string.kernelDownload_complete)
+                            .replace("###",
+                                    Environment.getExternalStorageDirectory().getPath() +
+                                    File.separator +
+                                    activity.getString(R.string.kernel_download_location)
+                            ))
+                    .setCancelable(true)
+                    .setTitle(activity.getString(R.string.toast_done))
+                    .show();
+        }
+    }
+
+    private static void doIt(Activity activity) {
+        File recoveryDir = new File("/cache/recovery");
+        File openRecoveryScript = new File(recoveryDir.toString() + File.separator +
+                "openrecoveryscript");
+
+        File file = new File(Environment.getExternalStorageDirectory().getPath() +
+                File.separator + activity.getString(R.string.kernel_download_location));
+        if (file.isFile() && file.exists()) {
+            Shell.SU.run(new String[]{
+                    "mount -o remount rw /cache",
+                    "echo install " + file.toString() + " > " +
+                            openRecoveryScript.toString(),
+                    "chmod 775 " + openRecoveryScript.toString()
+            });
+            new AlertDialog.Builder(activity)
+                    .setTitle(activity.getString(R.string.title_rebootToRecovery))
+                    .setMessage(activity.getString(R.string.message_rebootToRecovery))
+                    .setPositiveButton(activity.getString(R.string.button_rebootNow), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Shell.SU.run("reboot recovery");
+                                }
+                            }).start();
+                        }
+                    })
+                    .setNegativeButton(activity.getString(R.string.button_later), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                        }
+                    })
+                    .show();
+        } else {
+            MyTools.longToast(activity, R.string.toast_failed);
+            return;
+        }
     }
 
     @Override
     public void onPreExecute() {
-        progressDialog = new ProgressDialog(activity);
-        progressDialog.setTitle(activity.getString(R.string.pleaseWait));
-        progressDialog.setMessage(activity.getString(R.string.downloadingList));
-        progressDialog.show();
+        if (mode.equals("mode1")) {
+            progressDialog = new ProgressDialog(activity);
+            progressDialog.setTitle(activity.getString(R.string.pleaseWait));
+            progressDialog.setMessage(activity.getString(R.string.downloadingList));
+            progressDialog.show();
+        } else if (mode.equals("mode2")) {
+            dialog = new Dialog(activity);
+            dialog.setTitle(activity.getString(R.string.title_downloading));
+            dialog.setCancelable(false);
+            dialog.setContentView(R.layout.download_dialog);
+            dialog.show();
+        }
     }
 
     @Override
-    protected Boolean doInBackground(Integer... integers) {
-        try {
-            Log.d("TAG", "force = " + force);
-            if (!force && !(MyTools.readFile("/proc/version").toLowerCase().contains("hellsgod")))
+    protected Boolean doInBackground(String... strings) {
+        if (strings[0].equals("mode1"))
+            try {
+
+                if (!force && !(MyTools.readFile("/proc/version").toLowerCase().contains("hellsgod")))
+                    return false;
+
+                URL url = new URL(activity.getString(R.string.kernel_list_url).trim());
+
+                urlConnection = (HttpURLConnection) url.openConnection();
+
+                //urlConnection.setRequestMethod("GET"); << useless
+                //urlConnection.setDoOutput(true); << useless
+
+                urlConnection.connect();
+
+                File file = new File(Environment.getExternalStorageDirectory().getPath() +
+                        File.separator + activity.getString(R.string.hellscore_update_file));
+
+                FileOutputStream fileOutput = new FileOutputStream(file);
+
+                InputStream inputStream = urlConnection.getInputStream();
+
+                int totalSize = urlConnection.getContentLength();
+                progressDialog.setMax(totalSize);
+                int downloadedSize = 0;
+
+                byte[] buffer = new byte[1024];
+                int bufferLength;
+
+                while ((bufferLength = inputStream.read(buffer)) > 0) {
+                    fileOutput.write(buffer, 0, bufferLength);
+                    downloadedSize += bufferLength;
+                    progressDialog.setProgress(downloadedSize);
+
+                }
+                fileOutput.close();
+                urlConnection.disconnect();
+                return true;
+
+            } catch (MalformedURLException e) {
+                Log.d("TAG", e.toString());
+                e.printStackTrace();
                 return false;
-
-            URL url = new URL("https://dl.dropboxusercontent.com/s/8ro7mw2jfn75d2j/hellscoreKernelList.txt");
-
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-            urlConnection.setRequestMethod("GET");
-            urlConnection.setDoOutput(true);
-
-            urlConnection.connect();
-
-            File file = new File(Environment.getExternalStorageDirectory().getPath() + File.separator + "hellscore_update.txt");
-
-            FileOutputStream fileOutput = new FileOutputStream(file);
-
-            InputStream inputStream = urlConnection.getInputStream();
-
-            int totalSize = urlConnection.getContentLength();
-            progressDialog.setMax(totalSize);
-            int downloadedSize = 0;
-
-            byte[] buffer = new byte[1024];
-            int bufferLength;
-
-            while ((bufferLength = inputStream.read(buffer)) > 0) {
-                fileOutput.write(buffer, 0, bufferLength);
-                downloadedSize += bufferLength;
-                progressDialog.setProgress(downloadedSize);
-
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
             }
-            fileOutput.close();
-            return true;
+        else if (strings[0].equals("mode2"))
+            try {
 
-        } catch (MalformedURLException e) {
-            Log.d("TAG", e.toString());
-            e.printStackTrace();
+                if (!force && !(MyTools.readFile("/proc/version").toLowerCase().contains("hellsgod")))
+                    return false;
+
+                (dialog.findViewById(R.id.abortButton)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        killAll(activity);
+                        dialog.cancel();
+                    }
+                });
+
+                Shell.SU.run("mount -o remount rw /cache");
+
+                URL url = new URL(strings[1]);
+
+                urlConnection = (HttpURLConnection) url.openConnection();
+
+                urlConnection.connect();
+
+                File file = new File(Environment.getExternalStorageDirectory().getPath() +
+                        File.separator + activity.getString(R.string.kernel_download_location));
+
+                FileOutputStream fileOutput = new FileOutputStream(file);
+
+                InputStream inputStream = urlConnection.getInputStream();
+
+                int totalSize = urlConnection.getContentLength();
+                int downloadedSize = 0;
+
+                byte[] buffer = new byte[1024];
+                int bufferLength;
+
+                while ((bufferLength = inputStream.read(buffer)) > 0) {
+                    fileOutput.write(buffer, 0, bufferLength);
+                    downloadedSize += bufferLength;
+                    publishProgress(downloadedSize, totalSize); //display progress
+                }
+
+                fileOutput.close();
+                urlConnection.disconnect();
+                return true;
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                return false;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        else
             return false;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
     @Override
     public void onPostExecute(Boolean successful) {
-        progressDialog.dismiss();
+        if (mode.equals("mode1") && progressDialog != null) progressDialog.dismiss();
         if (successful) {
-            InfoTabFragment.postUpdates(activity);
+            if (mode.equals("mode1"))
+                InfoTabFragment.postUpdates(activity);
+            else if (mode.equals("mode2")) {
+                finish(activity, ((CheckBox) dialog.findViewById(R.id.autoInstall)).isChecked());
+                if (dialog != null) dialog.dismiss();
+                return;
+            }
         } else {
-            new AlertDialog.Builder(activity)
-                    .setCancelable(true)
-                    .setTitle(":(")
-                    .setMessage(activity.getString(R.string.service_not_available))
-                    .setNeutralButton("", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-
-                        }
-                    }).show();
+            if (!killedByMaster)
+                new AlertDialog.Builder(activity)
+                        .setCancelable(true)
+                        .setTitle(":(")
+                        .setMessage(activity.getString(R.string.service_not_available))
+                        .setNeutralButton("", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                            }
+                        }).show();
         }
+    }
+
+    @Override
+    protected void onProgressUpdate(Integer... args) {
+        ((ProgressBar) dialog.findViewById(R.id.progressBar))
+                .setIndeterminate(false);
+        ((TextView) dialog.findViewById(R.id.progressView))
+                .setText(args[0] + "/" + args[1]);
+        ((ProgressBar) dialog.findViewById(R.id.progressBar))
+                .setMax(args[1]);
+        ((ProgressBar) dialog.findViewById(R.id.progressBar))
+                .setProgress(args[0]);
+        //dialog.setCancelable(true);
     }
 }

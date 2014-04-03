@@ -124,7 +124,7 @@ public class subActivity1 extends ListActivity {
             case R.id.action_refresh:
                 buildData();
                 break;
-            case R.id.action_save:
+            case R.id.action_apply:
                 save();
                 if (setOnBoot) {
                     prepareScript(getScriptPath(a), true);
