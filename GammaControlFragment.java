@@ -78,7 +78,7 @@ public class GammaControlFragment extends Fragment {
             case R.id.action_refresh:
                 refreshAll();
                 return true;
-            case R.id.action_save:
+            case R.id.action_apply:
                 saveAll();
                 if (MODE != 1) {
                     Intent i1 = new Intent(getActivity(), BackgroudService.class);
@@ -393,12 +393,20 @@ public class GammaControlFragment extends Fragment {
         MyTools.write(redCal, this.getString(R.string.kgamma_r));
         MyTools.write(greenCal, this.getString(R.string.kgamma_g));
         MyTools.write(blueCal, this.getString(R.string.kgamma_b));
-        if (Integer.parseInt(redTemp) > 255)
-            redTemp = "255";
-        if (Integer.parseInt(greenTemp) > 255)
-            greenTemp = "255";
-        if (Integer.parseInt(blueTemp) > 255)
-            blueTemp = "255";
+
+        try {
+            redTemp = redTempField.getText().toString().trim();
+            blueTemp = blueTempField.getText().toString().trim();
+            greenTemp = greenTempField.getText().toString().trim();
+
+            if (Integer.parseInt(redTemp) > 255)
+                redTemp = "255";
+            if (Integer.parseInt(greenTemp) > 255)
+                greenTemp = "255";
+            if (Integer.parseInt(blueTemp) > 255)
+                blueTemp = "255";
+        } catch (Exception ingnored) {
+        }
 
         String comTemp = redTemp + " " + greenTemp + " " + blueTemp;
         MyTools.write(comTemp, this.getString(R.string.kcal));

@@ -121,7 +121,7 @@ public class CpuControlFragment extends Fragment {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     maxCpusDisplay.setText("" + (which + 1));
-                                    int cmn = Integer.parseInt((String) minCpusDisplay.getText());
+                                    int cmn = Integer.parseInt(minCpusDisplay.getText().toString());
                                     if (cmn - 1 > which)
                                         minCpusDisplay.setText("" + (which + 1));
                                 }
@@ -142,8 +142,7 @@ public class CpuControlFragment extends Fragment {
                                                     int which) {
                                     minCpusDisplay.setText("" + (which + 1));
                                     int cmx = Integer
-                                            .parseInt((String) maxCpusDisplay
-                                                    .getText());
+                                            .parseInt(maxCpusDisplay.getText().toString());
                                     if (cmx - 1 < which)
                                         maxCpusDisplay.setText("" + (which + 1));
                                 }
@@ -421,7 +420,7 @@ public class CpuControlFragment extends Fragment {
             case R.id.action_refresh:
                 refreshAll();
                 return true;
-            case R.id.action_save:
+            case R.id.action_apply:
                 saveAll();
                 if (setOnBoot.isChecked())
                     prepareScript(setOnBootFile, true);

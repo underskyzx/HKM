@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
@@ -90,16 +91,20 @@ public class InfoTabFragment extends Fragment {
 
         } catch (Exception e) {
             e.printStackTrace();
-            new AlertDialog.Builder(activity)
-                    .setCancelable(true)
-                    .setTitle("Oops")
-                    .setMessage(activity.getString(R.string.somethingWentWrong))
-                    .setNeutralButton(activity.getString(R.string.button_dismiss), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                        }
-                    })
-                    .show();
+            try {
+                new AlertDialog.Builder(activity)
+                        .setCancelable(true)
+                        .setTitle("Oops")
+                        .setMessage(activity.getString(R.string.somethingWentWrong))
+                        .setNeutralButton(activity.getString(R.string.button_dismiss), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                            }
+                        })
+                        .show();
+            } catch (WindowManager.BadTokenException ee) {
+                MyTools.toast(activity, R.string.somethingWentWrong);
+            }
         }
     }
 
