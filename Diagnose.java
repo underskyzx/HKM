@@ -90,7 +90,7 @@ public class Diagnose extends Activity {
                         "echo scripts:",
                         "cat " + scriptsDir + "/*"
                 });
-                list4 = Shell.SH.run(new String[] {
+                list4 = Shell.SH.run(new String[]{
                         "echo Last boot log:",
                         "cat /sdcard/HKM.log"
                 });

@@ -185,7 +185,7 @@ public class MyTools {
             p.println("if [ \"`ps | grep -m 1 [a]ndroid`\" ]; then");
             p.println("sleep 45");
         }
-        p.println("echo "+file.getName()+": executed -- `date` >> /sdcard/HKM.log");
+        p.println("echo " + file.getName() + ": executed -- `date` >> /sdcard/HKM.log");
         for (int i = 0; i < values.length; i++)
             p.println("echo " + values[i] + " > " + destinations[i]);
 
