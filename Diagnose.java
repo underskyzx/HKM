@@ -41,6 +41,7 @@ public class Diagnose extends Activity {
 
         try {
             getActionBar().setHomeButtonEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
         } catch (Exception ingnored) {
         }
 
