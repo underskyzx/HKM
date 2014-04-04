@@ -15,11 +15,14 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
 
 import java.io.File;
+
+import eu.chainfire.libsuperuser.Shell;
 
 
 public class MainActivity extends FragmentActivity implements TabListener {
@@ -59,6 +62,26 @@ public class MainActivity extends FragmentActivity implements TabListener {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Dialog dialog = new Dialog(this);
+                String[] list = getResources().getStringArray(R.array.messages_assistance);
+                String s = "";
+                for (String st : list)
+                    s += st + '\n';
+                dialog.setTitle(getString(R.string.title_assistance));
+                dialog.setContentView(R.layout.halp);
+                dialog.setCancelable(true);
+                ((TextView)dialog.findViewById(R.id.message)).setText(s);
+                dialog.show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle arg0) {
         super.onCreate(arg0);
 
@@ -82,7 +105,10 @@ public class MainActivity extends FragmentActivity implements TabListener {
         viewPager.setOnPageChangeListener(ChangeListener);
         actionBar = getActionBar();
         if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(false);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.apptheme_ic_navigation_drawer);
         }
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
