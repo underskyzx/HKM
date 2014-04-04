@@ -72,6 +72,8 @@ public class InfoTabFragment extends Fragment {
             String[] items = new String[list.size()];
             items = list.toArray(items);
 
+            final String[] finalItems = items;
+
             new AlertDialog.Builder(activity)
                     .setCancelable(false)
                     .setTitle(activity.getString(R.string.lastestVersions))
@@ -84,7 +86,13 @@ public class InfoTabFragment extends Fragment {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             //activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(links.get(i))));
-                            downloadFile(activity, false, "mode2", links.get(i));
+                            String filename = "";
+                            try {
+                                filename = (finalItems[i].split(":"))[1].replace("*new*", "").trim();
+                            } catch (Exception ignored) {
+
+                            }
+                            downloadFile(activity, false, "mode2", links.get(i), filename);
                         }
                     })
                     .show();

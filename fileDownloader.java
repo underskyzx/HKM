@@ -28,6 +28,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
     private static Dialog dialog;
     private static HttpURLConnection urlConnection;
     private static boolean killedByMaster;
+    private static String filename;
     private final Activity activity;
     private final boolean force;
     private String mode;
@@ -38,6 +39,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
         this.activity = activity;
         this.force = arg;
         this.mode = mode;
+        filename = "";
     }
 
     public static boolean killAll(Activity act) {
@@ -229,6 +231,9 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                     }
                 });
 
+                if(strings[2] != null)
+                    filename = strings[2];
+
                 Shell.SU.run("mount -o remount rw /cache");
 
                 URL url = new URL(strings[1]);
@@ -307,5 +312,6 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
         ((ProgressBar) dialog.findViewById(R.id.progressBar))
                 .setProgress(args[0]);
         //dialog.setCancelable(true);
+        ((TextView) dialog.findViewById(R.id.filename)).setText(filename);
     }
 }
