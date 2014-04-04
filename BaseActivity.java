@@ -52,7 +52,7 @@ public class BaseActivity extends Activity {
                                             null)
                                     .build()
                     );
-                    InfoTabFragment.downloadFile(activity, true);
+                    InfoTabFragment.downloadFile(activity, true, "mode1");
                 }
             });
         }
