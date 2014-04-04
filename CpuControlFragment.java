@@ -415,8 +415,6 @@ public class CpuControlFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-                return true;
             case R.id.action_refresh:
                 refreshAll();
                 return true;
@@ -470,35 +468,7 @@ public class CpuControlFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_cpu_control, container, false);
         setHasOptionsMenu(true);
-        initialize();
         return view;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle bundle) {
-        super.onActivityCreated(bundle);
-
-        saveProfile.setOnClickListener(onClickListener);
-        reloadProfile.setOnClickListener(onClickListener);
-        setOnBoot.setOnCheckedChangeListener(setOnBootListener);
-        saveProfile.setOnLongClickListener(saveProfileListener);
-        reloadProfile.setOnLongClickListener(reloadProfileListener);
-        cpuGovernorChangeButton.setOnLongClickListener(cpuGovernorChangeButtonListener);
-        minCpusButton.setOnClickListener(minCpusButtonListener);
-        maxCpusButton.setOnClickListener(maxCpusButtonListener);
-        boostedCpusButton.setOnClickListener(boostedCpusButtonListener);
-        suspendFreqButton.setOnClickListener(suspendFreqButtonListener);
-        suspendFreqButton.setOnLongClickListener(suspendFreqButtonLCListener);
-        globalOffsetBtn.setOnClickListener(globalOffsetBtnListener);
-        cpuGovernorChangeButton.setOnClickListener(cpuGovernorButtonListener);
-        MAX_FREQ.setOnSeekBarChangeListener(maxfreqListenner);
-        MIN_FREQ.setOnSeekBarChangeListener(minfreqListener);
-
-        if (volSeekBars != null)
-            for (SeekBar volSeekBar : volSeekBars) {
-                volSeekBar.setOnSeekBarChangeListener(voltagesListener);
-            }
-
     }
 
     @Override
@@ -506,6 +476,7 @@ public class CpuControlFragment extends Fragment {
         super.onStart();
         BaseActivity baseActivity = BaseActivity.getInstance();
         baseActivity.finish();
+        initialize();
         refreshAll();
         if (firstRun == 1) {
             firstRun = 0;
@@ -692,6 +663,28 @@ public class CpuControlFragment extends Fragment {
             MAX_FREQ.setMax(AVAIL_FREQ.length - 1);
             MIN_FREQ.setMax(AVAIL_FREQ.length - 1);
         }
+
+        saveProfile.setOnClickListener(onClickListener);
+        reloadProfile.setOnClickListener(onClickListener);
+        setOnBoot.setOnCheckedChangeListener(setOnBootListener);
+        saveProfile.setOnLongClickListener(saveProfileListener);
+        reloadProfile.setOnLongClickListener(reloadProfileListener);
+        cpuGovernorChangeButton.setOnLongClickListener(cpuGovernorChangeButtonListener);
+        minCpusButton.setOnClickListener(minCpusButtonListener);
+        maxCpusButton.setOnClickListener(maxCpusButtonListener);
+        boostedCpusButton.setOnClickListener(boostedCpusButtonListener);
+        suspendFreqButton.setOnClickListener(suspendFreqButtonListener);
+        suspendFreqButton.setOnLongClickListener(suspendFreqButtonLCListener);
+        globalOffsetBtn.setOnClickListener(globalOffsetBtnListener);
+        cpuGovernorChangeButton.setOnClickListener(cpuGovernorButtonListener);
+        MAX_FREQ.setOnSeekBarChangeListener(maxfreqListenner);
+        MIN_FREQ.setOnSeekBarChangeListener(minfreqListener);
+
+        if (volSeekBars != null)
+            for (SeekBar volSeekBar : volSeekBars) {
+                volSeekBar.setOnSeekBarChangeListener(voltagesListener);
+            }
+
     }
 
     private void saveAll() {
