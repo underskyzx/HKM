@@ -78,7 +78,6 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                                     }
                                 })
                                 .show();
-                        return;
                     }
                 }
             }.execute(recoveryDir);
@@ -284,7 +283,6 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
             else if (mode.equals("mode2")) {
                 finish(activity, ((CheckBox) dialog.findViewById(R.id.autoInstall)).isChecked());
                 if (dialog != null) dialog.dismiss();
-                return;
             }
         } else {
             if (!killedByMaster)
