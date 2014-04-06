@@ -18,11 +18,16 @@ import android.widget.TextView;
 
 import com.themike10452.hellscorekernelmanager.Blackbox.Blackbox;
 
+import java.io.File;
+
 
 public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
 
+    public static String setOnBootFileName = "sound";
     private View view;
     private boolean linkRulesApply, linked;
+    private CheckBox setOnBoot;
+    private File setOnBootFile;
 
     private EditText left_hp_gain_display, right_hp_gain_display,
             left_hp_pa_display, right_hp_pa_display,
@@ -104,6 +109,8 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
             );
         }
 
+        setOnBoot = (CheckBox) view.findViewById(R.id.setOnBoot);
+
         ((CheckBox) view.findViewById(R.id.link)).setChecked(linked);
 
         ((CheckBox) view.findViewById(R.id.link)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -134,6 +141,9 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
     private void refresh(boolean bool) {
 
         linkRulesApply = bool;
+
+        File file = new File(getActivity().getFilesDir() + File.separator + setOnBootFileName);
+        setOnBoot.setChecked(file.exists() && file.isFile());
 
         String a, b, c, d, e;
         {
@@ -207,42 +217,6 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
 
     }
 
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        boolean link = ((CheckBox) view.findViewById(R.id.link)).isChecked();
-        switch (seekBar.getId()) {
-            case R.id.left_hp_gain:
-                left_hp_gain_display.setText(Integer.toString(seekBar.getProgress() - 20));
-                if (link && linkRulesApply)
-                    right_hp_gain.setProgress(seekBar.getProgress());
-                break;
-            case R.id.right_hp_gain:
-                right_hp_gain_display.setText(Integer.toString(seekBar.getProgress() - 20));
-                if (link && linkRulesApply)
-                    left_hp_gain.setProgress(seekBar.getProgress());
-                break;
-            case R.id.left_hp_pa:
-                left_hp_pa_display.setText(Integer.toString(seekBar.getProgress() - 6));
-                if (link && linkRulesApply)
-                    right_hp_pa.setProgress(seekBar.getProgress());
-                break;
-            case R.id.right_hp_pa:
-                right_hp_pa_display.setText(Integer.toString(seekBar.getProgress() - 6));
-                if (link && linkRulesApply)
-                    left_hp_pa.setProgress(seekBar.getProgress());
-                break;
-            case R.id.speaker_gain:
-                speaker_gain_display.setText(Integer.toString(seekBar.getProgress() - 20));
-                break;
-            case R.id.mic_gain:
-                mic_gain_display.setText(Integer.toString(seekBar.getProgress() - 20));
-                break;
-            case R.id.camMic_gain:
-                camMic_gain_display.setText(Integer.toString(seekBar.getProgress() - 20));
-                break;
-        }
-    }
-
     private void save() {
 
         try {
@@ -281,6 +255,36 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
                         MyTools.SUhardWrite(rep4, getString(R.string.MIC_GAIN_PATH));
                         MyTools.SUhardWrite(rep5, getString(R.string.CAMMIC_GAIN_PATH));
                         MyTools.SUhardWrite("1", getString(R.string.SOUND_LOCK_PATH));
+
+                        //set on boot prep
+
+                        if (setOnBoot.isChecked()) {
+                            if (setOnBootFile == null)
+                                setOnBootFile = new File(getActivity().getFilesDir()
+                                        + File.separator + setOnBootFileName);
+                            MyTools.write(
+                                    String.format(
+                                            "%s.%s::%s.%s::%s.%s::%s::%s",
+                                            left_hp_gain_display.getText().toString(),
+                                            right_hp_gain_display.getText().toString(),
+                                            left_hp_pa_display.getText().toString(),
+                                            right_hp_pa_display.getText().toString(),
+                                            speaker_gain_display.getText().toString(),
+                                            speaker_gain_display.getText().toString(),
+                                            mic_gain_display.getText().toString(),
+                                            camMic_gain_display.getText().toString()
+                                    ),
+                                    setOnBootFile.toString()
+                            );
+
+                        } else {
+                            if (setOnBootFile == null)
+                                setOnBootFile = new File(getActivity().getFilesDir()
+                                        + File.separator + setOnBootFileName);
+                            if (setOnBootFile.exists() && setOnBootFile.isFile())
+                                setOnBootFile.delete();
+                        }
+
                     } catch (Exception eee) {
                         eee.printStackTrace();
                         return false;
@@ -302,6 +306,42 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
             MyTools.toast(getActivity(), R.string.somethingWentWrong);
         }
 
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        boolean link = ((CheckBox) view.findViewById(R.id.link)).isChecked();
+        switch (seekBar.getId()) {
+            case R.id.left_hp_gain:
+                left_hp_gain_display.setText(Integer.toString(seekBar.getProgress() - 20));
+                if (link && linkRulesApply)
+                    right_hp_gain.setProgress(seekBar.getProgress());
+                break;
+            case R.id.right_hp_gain:
+                right_hp_gain_display.setText(Integer.toString(seekBar.getProgress() - 20));
+                if (link && linkRulesApply)
+                    left_hp_gain.setProgress(seekBar.getProgress());
+                break;
+            case R.id.left_hp_pa:
+                left_hp_pa_display.setText(Integer.toString(seekBar.getProgress() - 6));
+                if (link && linkRulesApply)
+                    right_hp_pa.setProgress(seekBar.getProgress());
+                break;
+            case R.id.right_hp_pa:
+                right_hp_pa_display.setText(Integer.toString(seekBar.getProgress() - 6));
+                if (link && linkRulesApply)
+                    left_hp_pa.setProgress(seekBar.getProgress());
+                break;
+            case R.id.speaker_gain:
+                speaker_gain_display.setText(Integer.toString(seekBar.getProgress() - 20));
+                break;
+            case R.id.mic_gain:
+                mic_gain_display.setText(Integer.toString(seekBar.getProgress() - 20));
+                break;
+            case R.id.camMic_gain:
+                camMic_gain_display.setText(Integer.toString(seekBar.getProgress() - 20));
+                break;
+        }
     }
 
     @Override
