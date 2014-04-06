@@ -30,6 +30,7 @@ public class ProgressTask extends AsyncTask<Integer, Void, Boolean> {
     }
 
     protected void onPostExecute(Boolean arg0) {
+        BaseActivity.getInstance().finish();
         activity.startActivity(intent);
         p.dismiss();
     }

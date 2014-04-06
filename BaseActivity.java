@@ -19,7 +19,10 @@ public class BaseActivity extends Activity {
     }
 
     public static BaseActivity getInstance() {
-        return instance;
+        if (instance != null)
+            return instance;
+        else
+            return new BaseActivity();
     }
 
 
@@ -33,7 +36,6 @@ public class BaseActivity extends Activity {
         if (kernel.toLowerCase().contains("hells")) {
             Intent i = new Intent(this, MainActivity.class);
             new ProgressTask(this, i).execute();
-            finish();
         } else {
             findViewById(R.id.progressBar).setVisibility(TextView.GONE);
             findViewById(R.id.button).setVisibility(View.VISIBLE);
