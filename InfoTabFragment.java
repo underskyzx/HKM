@@ -92,7 +92,7 @@ public class InfoTabFragment extends Fragment {
                             } catch (Exception ignored) {
 
                             }
-                            downloadFile(activity, false, "mode2", links.get(i), filename);
+                            downloadFile(activity, true, "mode2", links.get(i), filename);
                         }
                     })
                     .show();
@@ -171,7 +171,6 @@ public class InfoTabFragment extends Fragment {
         Button stable = (Button) view.findViewById(R.id.stable);
         Button test = (Button) view.findViewById(R.id.test);
         Button check = (Button) view.findViewById(R.id.check);
-        Button killDownloads = (Button) view.findViewById(R.id.killAllButton);
         stable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -222,26 +221,6 @@ public class InfoTabFragment extends Fragment {
                                 .build()
                 );
                 downloadFile(getActivity(), false, "mode1");
-            }
-        });
-
-        // currently unused
-        killDownloads.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MyTools.toast(getActivity(), getString(R.string.toast_longPress_toUse));
-            }
-        });
-        // currently unused
-        killDownloads.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                if (fileDownloader.killAll(getActivity())) {
-                    MyTools.toast(getActivity(), R.string.toast_done);
-                } else {
-                    MyTools.toast(getActivity(), "No downloads to terminate");
-                }
-                return true;
             }
         });
 

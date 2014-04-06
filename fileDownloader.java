@@ -42,22 +42,6 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
         filename = "";
     }
 
-    public static boolean killAll(Activity act) {
-        if (urlConnection == null)
-            return false;
-        killedByMaster = true;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                urlConnection.disconnect();
-            }
-        }).start();
-
-        return (new File(Environment.getExternalStorageDirectory().getPath() +
-                File.separator + act.getString(R.string.kernel_download_location)))
-                .delete();
-    }
-
     private static void finish(final Activity activity, boolean install) {
         if (install) {
             String recoveryDir = "/cache/recovery";
@@ -103,8 +87,8 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                     .setMessage(activity.getString(R.string.kernelDownload_complete)
                             .replace("###",
                                     Environment.getExternalStorageDirectory().getPath() +
-                                    File.separator +
-                                    activity.getString(R.string.kernel_download_location)
+                                            File.separator +
+                                            activity.getString(R.string.kernel_download_location)
                             ))
                     .setCancelable(true)
                     .setTitle(activity.getString(R.string.toast_done))
@@ -150,6 +134,21 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
             MyTools.longToast(activity, R.string.toast_failed);
             return;
         }
+    }
+
+    public boolean killAll(Activity act) {
+        if (urlConnection == null)
+            return false;
+        killedByMaster = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                urlConnection.disconnect();
+            }
+        }).start();
+        return (new File(Environment.getExternalStorageDirectory().getPath() +
+                File.separator + act.getString(R.string.kernel_download_location)))
+                .delete();
     }
 
     @Override
@@ -231,7 +230,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                     }
                 });
 
-                if(strings[2] != null)
+                if (strings[2] != null)
                     filename = strings[2];
 
                 Shell.SU.run("mount -o remount rw /cache");
