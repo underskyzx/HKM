@@ -182,7 +182,7 @@ public class MyTools {
 
         PrintWriter p = new PrintWriter(new FileWriter(file));
         p.println("#!/system/bin/sh");
-        p.println("echo " + file.getName() + ": called -- `date` >> /sdcard/HKM.log");
+        p.println("echo " + file.getName() + ": called -- `date +%T` >> /sdcard/HKM.log");
         if (flags.contains(":delay:")) {
             p.println("if [ \"`ps | grep -m 1 [a]ndroid`\" ]; then");
             p.println("sleep 3");
@@ -293,7 +293,7 @@ public class MyTools {
                 pw.println("#!/system/bin/sh");
                 pw.println("if [ \"`cat /proc/version | grep -i hells`\" ];");
                 pw.println("then");
-                pw.println("echo hellsCore Manager: bootime -- `date` > /sdcard/HKM.log");
+                pw.println("echo hellsCore Manager: bootime -- `date +%T` > /sdcard/HKM.log");
                 pw.println("else");
                 pw.println("exit 99");
                 pw.println("fi");
