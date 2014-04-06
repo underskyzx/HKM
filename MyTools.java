@@ -52,21 +52,26 @@ public class MyTools {
         }
     }
 
+    public static void SUhardWrite(final String data, final String file) {
+        //can not be used on main thread!
+        Shell.SU.run(String.format("echo \"%s\" > \"%s\"", data, file));
+    }
+
     public static void write(final String data, final String file) {
         if (rootSession != null) {
-            rootSession.addCommand("echo " + data + " > " + file);
+            rootSession.addCommand(String.format("echo \"%s\" > \"%s\"", data, file));
         } else {
             initiateSUShell(null);
-            rootSession.addCommand("echo " + data + " > " + file);
+            rootSession.addCommand(String.format("echo \"%s\" > \"%s\"", data, file));
         }
     }
 
     public static void write(final int data, final String file) {
         if (rootSession != null) {
-            rootSession.addCommand("echo " + data + " > " + file);
+            rootSession.addCommand(String.format("echo \"%s\" > \"%s\"", data, file));
         } else {
             initiateSUShell(null);
-            rootSession.addCommand("echo " + data + " > " + file);
+            rootSession.addCommand(String.format("echo \"%s\" > \"%s\"", data, file));
         }
     }
 

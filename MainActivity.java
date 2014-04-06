@@ -22,8 +22,6 @@ import com.google.analytics.tracking.android.EasyTracker;
 
 import java.io.File;
 
-import eu.chainfire.libsuperuser.Shell;
-
 
 public class MainActivity extends FragmentActivity implements TabListener {
 
@@ -73,7 +71,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
                 dialog.setTitle(getString(R.string.title_assistance));
                 dialog.setContentView(R.layout.halp);
                 dialog.setCancelable(true);
-                ((TextView)dialog.findViewById(R.id.message)).setText(s);
+                ((TextView) dialog.findViewById(R.id.message)).setText(s);
                 dialog.show();
                 return true;
             default:
@@ -117,6 +115,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
         ActionBar.Tab gammaControlTab = actionBar.newTab();
         ActionBar.Tab gpuControlTab = actionBar.newTab();
         ActionBar.Tab miscTab = actionBar.newTab();
+        ActionBar.Tab soundControlTab = actionBar.newTab();
         ActionBar.Tab infoTab = actionBar.newTab();
 
         cpuControlTab.setText(R.string.cpuTab);
@@ -124,6 +123,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
         touchControlTab.setText(R.string.touchControl);
         gammaControlTab.setText(R.string.gammaTab);
         miscTab.setText(R.string.miscTab);
+        soundControlTab.setText(R.string.soundTab);
         infoTab.setText(R.string.infoTab);
 
         cpuControlTab.setTabListener(this);
@@ -131,6 +131,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
         gammaControlTab.setTabListener(this);
         gpuControlTab.setTabListener(this);
         miscTab.setTabListener(this);
+        soundControlTab.setTabListener(this);
         infoTab.setTabListener(this);
 
         actionBar.addTab(cpuControlTab);
@@ -138,6 +139,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
         actionBar.addTab(miscTab);
         actionBar.addTab(gammaControlTab);
         actionBar.addTab(touchControlTab);
+        actionBar.addTab(soundControlTab);
         actionBar.addTab(infoTab);
     }
 
@@ -221,6 +223,9 @@ class Adapter extends FragmentStatePagerAdapter {
                 f = new TouchControlFragment();
                 break;
             case 5:
+                f = new SoundControlFragment();
+                break;
+            case 6:
                 f = new InfoTabFragment();
         }
         return f;
@@ -228,7 +233,7 @@ class Adapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
-        return 6;
+        return 7;
     }
 
 }
