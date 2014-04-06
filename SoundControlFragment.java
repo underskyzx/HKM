@@ -92,7 +92,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
                     new String[]{DBHelper.SETTINGS_TABLE_COLUMN1}))[0];
             linked = Boolean.parseBoolean(ss);
         } catch (Exception e) {
-            linked = false;
+            linked = true;
             MySQLiteAdapter.insertOrUpdate(
                     getActivity(),
                     DBHelper.SETTINGS_TABLE,
