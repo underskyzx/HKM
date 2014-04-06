@@ -474,8 +474,8 @@ public class CpuControlFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        BaseActivity baseActivity = BaseActivity.getInstance();
-        baseActivity.finish();
+        //BaseActivity baseActivity = BaseActivity.getInstance();
+        //baseActivity.finish();
         initialize();
         refreshAll();
         if (firstRun == 1) {

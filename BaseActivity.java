@@ -33,6 +33,7 @@ public class BaseActivity extends Activity {
         if (kernel.toLowerCase().contains("hells")) {
             Intent i = new Intent(this, MainActivity.class);
             new ProgressTask(this, i).execute();
+            finish();
         } else {
             findViewById(R.id.progressBar).setVisibility(TextView.GONE);
             findViewById(R.id.button).setVisibility(View.VISIBLE);
