@@ -5,6 +5,7 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,7 +27,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
 
     public static String setOnBootFileName = "sound";
     private View view;
-    private boolean linkRulesApply, linked;
+    private boolean linkRulesApply, linked = true;
     private CheckBox setOnBoot;
     private File setOnBootFile;
 
@@ -91,6 +92,8 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
             String ss = (MySQLiteAdapter.select(getActivity(), DBHelper.SETTINGS_TABLE,
                     DBHelper.SETTINGS_TABLE_KEY, DBHelper.sound_linkLR_entry,
                     new String[]{DBHelper.SETTINGS_TABLE_COLUMN1}))[0];
+            if(!ss.equals("true") && !ss.equals("false"))
+                throw new Exception();
             linked = Boolean.parseBoolean(ss);
         } catch (Exception e) {
             linked = true;
