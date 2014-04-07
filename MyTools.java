@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -369,6 +370,12 @@ public class MyTools {
         BufferedReader bufferedReader;
         bufferedReader = new BufferedReader(new FileReader(new File(file)));
         return bufferedReader.readLine();
+    }
+
+    public static void playSound(Activity activity) {
+        MediaPlayer mp = MediaPlayer.create(activity, R.raw.doink);
+        mp.setLooping(false);
+        mp.start();
     }
 
     private static String readDump(String fp) {

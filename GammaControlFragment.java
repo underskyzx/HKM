@@ -79,6 +79,7 @@ public class GammaControlFragment extends Fragment {
                 refreshAll();
                 return true;
             case R.id.action_apply:
+                MyTools.playSound(getActivity());
                 saveAll();
                 if (MODE != 1) {
                     Intent i1 = new Intent(getActivity(), BackgroudService.class);

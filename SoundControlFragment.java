@@ -1,6 +1,7 @@
 package com.themike10452.hellscorekernelmanager;
 
 
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -361,6 +362,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
                 refresh(false);
                 return true;
             case R.id.action_apply:
+                MyTools.playSound(getActivity());
                 save();
                 return true;
             default:

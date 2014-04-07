@@ -125,6 +125,7 @@ public class subActivity1 extends ListActivity {
                 buildData();
                 break;
             case R.id.action_apply:
+                MyTools.playSound(this);
                 save();
                 if (setOnBoot) {
                     prepareScript(getScriptPath(a), true);

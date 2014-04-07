@@ -96,6 +96,7 @@ public class MiscFragment extends Fragment {
                 refreshAll();
                 return true;
             case R.id.action_apply:
+                MyTools.playSound(getActivity());
                 saveAll();
                 if (setOnBoot.isChecked())
                     prepareBootScript();

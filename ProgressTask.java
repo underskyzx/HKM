@@ -26,7 +26,6 @@ public class ProgressTask extends AsyncTask<Integer, Void, Boolean> {
         p.setCancelable(false);
         p.setIndeterminate(true);
         p.show();
-
     }
 
     protected void onPostExecute(Boolean arg0) {

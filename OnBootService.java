@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.IBinder;
 
@@ -126,6 +127,9 @@ public class OnBootService extends Service {
             @Override
             protected void onPostExecute(Integer integer) {
                 super.onPostExecute(integer);
+                MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.io);
+                mediaPlayer.setLooping(false);
+                mediaPlayer.start();
                 switch (integer) {
                     case 2:
                         MyTools.longToast(getApplicationContext(), R.string.toast_failed_soundControl);
