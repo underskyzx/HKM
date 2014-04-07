@@ -151,7 +151,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
             final Dialog dialog = new Dialog(this);
             dialog.setTitle(getString(R.string.title_about));
             dialog.setContentView(R.layout.about_dialog);
-            TextView version = (TextView) dialog.findViewById(R.id.version);
+            TextView version = (TextView) dialog.findViewById(R.id.misc);
 
             try {
                 appVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
