@@ -3,6 +3,7 @@ package com.themike10452.hellscorekernelmanager;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.ActionBar.TabListener;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentTransaction;
@@ -16,6 +17,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
@@ -63,16 +65,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                Dialog dialog = new Dialog(this);
-                String[] list = getResources().getStringArray(R.array.messages_assistance);
-                String s = "";
-                for (String st : list)
-                    s += st + '\n';
-                dialog.setTitle(getString(R.string.title_assistance));
-                dialog.setContentView(R.layout.halp);
-                dialog.setCancelable(true);
-                ((TextView) dialog.findViewById(R.id.message)).setText(s);
-                dialog.show();
+                MyTools.playSound(this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -192,6 +185,16 @@ public class MainActivity extends FragmentActivity implements TabListener {
                     }
                 })
                 .show();
+    }
+
+    public static void showDonationDialog(Activity activity) {
+        Dialog dialog = new Dialog(activity);
+        dialog.setTitle(activity.getString(R.string.title_donation));
+        dialog.setContentView(R.layout.halp);
+        dialog.setCancelable(true);
+        ((EditText) dialog.findViewById(R.id.message))
+                .setText(activity.getString(R.string.donation_email));
+        dialog.show();
     }
 
 }

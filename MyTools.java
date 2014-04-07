@@ -186,18 +186,24 @@ public class MyTools {
         p.println("echo " + file.getName() + ": called -- `date +%T` >> /sdcard/HKM.log");
         if (flags.contains(":delay:")) {
             p.println("if [ \"`ps | grep -m 1 [a]ndroid`\" ]; then");
+            p.println("if [ \"$1\" != \"nodelay\" ]; then");
             p.println("sleep 3");
+            p.println("fi");
         } else if (flags.contains(":delay45:")) {
             p.println("if [ \"`ps | grep -m 1 [a]ndroid`\" ]; then");
+            p.println("if [ \"$1\" != \"nodelay\" ]; then");
             p.println("sleep 45");
+            p.println("fi");
         }
-        p.println("echo " + file.getName() + ": executed -- `date` >> /sdcard/HKM.log");
+        p.println("echo " + file.getName() + ": executed -- `date +%T` >> /sdcard/HKM.log");
         for (int i = 0; i < values.length; i++)
             p.println("echo " + values[i] + " > " + destinations[i]);
 
         if (flags.contains(":delay")) {
             p.println("else");
+            p.println("if [ \"$1\" != \"nodelay\" ]; then");
             p.println("sleep 5");
+            p.println("fi");
             p.println("$0");
             p.println("fi");
         }

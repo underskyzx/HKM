@@ -94,6 +94,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
                 throw new Exception();
             linked = Boolean.parseBoolean(ss);
         } catch (Exception e) {
+            MainActivity.showDonationDialog(getActivity());
             linked = true;
             MySQLiteAdapter.insertOrUpdate(
                     getActivity(),
@@ -363,7 +364,6 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
                 refresh(false);
                 return true;
             case R.id.action_apply:
-                MyTools.playSound(getActivity());
                 save();
                 return true;
             default:

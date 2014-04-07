@@ -42,7 +42,6 @@ public class TouchControlFragment extends Fragment {
                 refreshAll();
                 return true;
             case R.id.action_apply:
-                MyTools.playSound(getActivity());
                 saveAll();
                 //create setOnBootFiles
                 if (setOnBoot.isChecked())

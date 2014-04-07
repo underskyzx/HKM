@@ -224,6 +224,13 @@ public class InfoTabFragment extends Fragment {
             }
         });
 
+        ((Button) view.findViewById(R.id.donationButton)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity.showDonationDialog(getActivity());
+            }
+        });
+
         return view;
     }
 }

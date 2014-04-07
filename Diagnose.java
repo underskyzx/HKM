@@ -2,6 +2,7 @@ package com.themike10452.hellscorekernelmanager;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -63,6 +64,17 @@ public class Diagnose extends Activity {
         bootLog = (TextView) findViewById(R.id.bootLog);
         fix = (Button) findViewById(R.id.fixButton);
         recBoot = (Button) findViewById(R.id.recBoot);
+
+        ((Button) findViewById(R.id.button_bootService)).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent i = new Intent(thisActivity, OnBootService.class);
+                        thisActivity.stopService(i);
+                        thisActivity.startService(i);
+                    }
+                }
+        );
 
     }
 
