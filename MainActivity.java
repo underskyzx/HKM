@@ -10,6 +10,7 @@ import android.app.FragmentTransaction;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -17,6 +18,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -187,11 +190,17 @@ public class MainActivity extends FragmentActivity implements TabListener {
                 .show();
     }
 
-    public static void showDonationDialog(Activity activity) {
+    public static void showDonationDialog(final Activity activity) {
         Dialog dialog = new Dialog(activity);
         dialog.setTitle(activity.getString(R.string.title_donation));
         dialog.setContentView(R.layout.halp);
         dialog.setCancelable(true);
+        ((Button) dialog.findViewById(R.id.button_donate)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(activity.getString(R.string.donation_link))));
+            }
+        });
         ((EditText) dialog.findViewById(R.id.message))
                 .setText(activity.getString(R.string.donation_email));
         dialog.show();
