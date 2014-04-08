@@ -3,6 +3,7 @@ package com.themike10452.hellscorekernelmanager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import java.io.File;
 
@@ -19,11 +20,16 @@ public class BootReceiver extends BroadcastReceiver {
                 Intent cm = new Intent(context, BackgroudService.class);
                 context.startService(cm);
             }
-            Thread.sleep(45000, 0);
-            Intent intent = new Intent(context, OnBootService.class);
-            context.startService(intent);
-            Shell.SH.run(String.format("echo boot service called @ `date %s` >> %s", "+%T", "/sdcard/HKM.log"));
+            if ((new File(context.getFilesDir() + SoundControlFragment.setOnBootFileName))
+                    .exists() || (new File(context.getFilesDir().toString()
+                    .replace("/files", "/scripts"))).exists()) {
+                Thread.sleep(10000, 0);
+                Intent intent = new Intent(context, OnBootService.class);
+                context.startService(intent);
+                Shell.SH.run(String.format("echo boot service called @ `date %s` >> %s", "+%T", "/sdcard/HKM.log"));
+            }
         } catch (Exception e) {
+            Log.d("TAG", "hooooo");
             e.printStackTrace();
         }
     }

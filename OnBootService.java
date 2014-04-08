@@ -40,23 +40,35 @@ public class OnBootService extends Service {
             @Override
             protected Integer doInBackground(Void... voids) {
                 int errorcode = 0;
+
+                PackageManager m = getPackageManager();
+                String dataDir = getPackageName();
+                PackageInfo p = null;
                 try {
-                    PackageManager m = getPackageManager();
-                    String dataDir = getPackageName();
-                    PackageInfo p = m.getPackageInfo(dataDir, 0);
-                    dataDir = p.applicationInfo.dataDir;
-                    File[] scripts = (new File(dataDir + "/scripts")).listFiles();
-                    for (File script : scripts) {
-                        Log.d("TAG", "sh " + script.toString() + " nodelay");
-                        Shell.SU.run(new String[]{
-                                "chmod 775 " + script.toString(),
-                                "sh " + script.toString() + " nodelay"
-                        });
-                    }
-                } catch (Exception e) {
+                    p = m.getPackageInfo(dataDir, 0);
+                } catch (PackageManager.NameNotFoundException e) {
                     e.printStackTrace();
-                    errorcode += 1;
                 }
+                dataDir = p.applicationInfo.dataDir;
+
+                if ((new File(dataDir + "/scripts")).exists())
+                    if ((new File(dataDir + "/scripts")).listFiles().length > 0)
+                        try {
+                            File[] scripts = (new File(dataDir + "/scripts")).listFiles();
+                            for (File script : scripts) {
+                                Log.d("TAG", "sh " + script.toString() + " nodelay");
+                                Shell.SU.run(new String[]{
+                                        "chmod 775 " + script.toString(),
+                                        "sh " + script.toString() + " nodelay"
+                                });
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            errorcode += 1;
+                        }
+                    else
+                        errorcode -= 50;
+                else errorcode -= 50;
 
                 File sound = new File(getFilesDir() + File.separator
                         + SoundControlFragment.setOnBootFileName);
@@ -65,7 +77,6 @@ public class OnBootService extends Service {
                     try {
                         String soundLock = getString(R.string.SOUND_LOCK_PATH);
                         MyTools.SUhardWrite("0", soundLock);
-
 
                         String data = (Shell.SU.run("cat " + sound.toString())).get(0);
                         data = data.replace(".", " ");
@@ -122,27 +133,41 @@ public class OnBootService extends Service {
                         e.printStackTrace();
                         errorcode += 2;
                     }
+                else
+                    errorcode -= 10;
+
                 return errorcode;
             }
 
             @Override
-            protected void onPostExecute(Integer integer) {
-                super.onPostExecute(integer);
-                MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.io);
-                mediaPlayer.setLooping(false);
-                mediaPlayer.start();
-                switch (integer) {
+            protected void onPostExecute(Integer i) {
+                super.onPostExecute(i);
+                Log.d("TAG", i + "");
+                byte go = 0;
+
+                switch (i) {
                     case 2:
+                    case -48:
                         MyTools.longToast(getApplicationContext(), R.string.toast_failed_soundControl);
                     case 0:
+                    case -10:
+                    case -50:
                         MyTools.longToast(getApplicationContext(), R.string.toast_done_succ);
                         break;
                     case 1:
-                        MyTools.longToast(getApplicationContext(), R.string.toast_failed_setOnBoot + "(" + 1 + ")");
-                        break;
                     case 3:
-                        MyTools.longToast(getApplicationContext(), R.string.toast_failed_setOnBoot + "(" + 3 + ")");
+                    case -9:
+                        MyTools.longToast(getApplicationContext(), getString(R.string.toast_failed_setOnBoot) + "(" + i + ")");
                         break;
+                    case -60:
+                    default:
+                        go = -1;
+                        break;
+                }
+                if (go == 0) {
+                    MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.io);
+                    mediaPlayer.setLooping(false);
+                    mediaPlayer.start();
                 }
             }
         }.execute();
