@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
@@ -228,6 +229,20 @@ public class InfoTabFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 MainActivity.showDonationDialog(getActivity());
+            }
+        });
+
+        ((Button) view.findViewById(R.id.kernelThread)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.kernel_thread))));
+            }
+        });
+
+        ((Button) view.findViewById(R.id.appThread)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.app_thread))));
             }
         });
 
