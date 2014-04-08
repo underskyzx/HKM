@@ -23,7 +23,7 @@ public class BootReceiver extends BroadcastReceiver {
             if ((new File(context.getFilesDir() + SoundControlFragment.setOnBootFileName))
                     .exists() || (new File(context.getFilesDir().toString()
                     .replace("/files", "/scripts"))).exists()) {
-                Thread.sleep(10000, 0);
+                Thread.sleep(45000, 0);
                 Intent intent = new Intent(context, OnBootService.class);
                 context.startService(intent);
                 Shell.SH.run(String.format("echo boot service called @ `date %s` >> %s", "+%T", "/sdcard/HKM.log"));
