@@ -101,7 +101,7 @@ public class OnBootService extends Service {
                                     val = Blackbox.tool2(b1, b2, (byte) 2);
                                     break;
                                 case 4:
-                                case 5:
+                                case 3:
                                     short b0 = Short.parseShort(value);
                                     val = Blackbox.tool1(b0);
                                     break;
