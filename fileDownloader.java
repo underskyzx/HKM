@@ -131,7 +131,6 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                     .show();
         } else {
             MyTools.longToast(activity, R.string.toast_failed);
-            return;
         }
     }
 
