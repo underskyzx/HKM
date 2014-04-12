@@ -311,14 +311,14 @@ public class MyTools {
                 pw.flush();
                 pw.close();
 
-                Shell.SU.run("mount -o remount rw /system");
+                Shell.SU.run("mount -o remount,rw /system");
                 Shell.SU.run("chmod 775 " + setOnBootAgentTmpFile.toString());
                 Shell.SU.run("rm /system/etc/init.d/99hellscore_*");
                 Shell.SU.run("cat " + setOnBootAgentTmpFile.toString() + " > " + setOnBootAgentFile.toString());
                 Shell.SU.run(new String[]{
                         "chmod 775 " + setOnBootAgentFile.toString(),
                         "rm " + setOnBootAgentTmpFile.toString(),
-                        "mount -o remount ro /system"
+                        "mount -o remount,ro /system"
                 });
                 return true;
             }
