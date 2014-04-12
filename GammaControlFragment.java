@@ -411,9 +411,16 @@ public class GammaControlFragment extends Fragment {
         String comTemp = redTemp + " " + greenTemp + " " + blueTemp;
         MyTools.write(comTemp, this.getString(R.string.kcal));
 
-        if (MODE == 2)
-            MyTools.write(1,
-                    this.getString(R.string.kgamma_b).replace("_b", "_apply"));
+        if ((new File(getString(R.string.REFRESH_SCREEN))).exists())
+            MyTools.execTerminalCommand(new String[]{
+                    String.format("echo 1 > %s", getString(R.string.REFRESH_SCREEN))
+            });
+
+        if ((new File(getString(R.string.kgamma_apply))).exists())
+            MyTools.execTerminalCommand(new String[]{
+                    String.format("echo 1 > %s", getString(R.string.kgamma_apply))
+            });
+
         showOutMsg(0);
     }
 
@@ -531,40 +538,41 @@ public class GammaControlFragment extends Fragment {
     }
 
     private void prepareBootScript() {
-        try {
-            if (MODE == 2) return;
+        if (MODE != 2)
+            try {
 
-            getValues();
-            if (!scriptsDir.exists())
-                scriptsDir.mkdirs();
+                getValues();
+                if (!scriptsDir.exists())
+                    scriptsDir.mkdirs();
 
-            String comTemp = redTemp + " " + greenTemp + " " + blueTemp;
+                String comTemp = redTemp + " " + greenTemp + " " + blueTemp;
 
-            if (setOnBootFile.exists() && !setOnBootFile.isDirectory())
-                setOnBootFile.delete();
+                if (setOnBootFile.exists() && !setOnBootFile.isDirectory())
+                    setOnBootFile.delete();
 
-            setOnBootFile.createNewFile();
+                setOnBootFile.createNewFile();
 
 
-            String[] values = {
-                    redCal, greenCal, blueCal, comTemp
-            };
+                String[] values = {
+                        redCal, greenCal, blueCal, comTemp, "1"
+                };
 
-            String[] destinations = {
-                    this.getString(R.string.kgamma_r),
-                    this.getString(R.string.kgamma_g),
-                    this.getString(R.string.kgamma_b),
-                    this.getString(R.string.kcal)
-            };
+                String[] destinations = {
+                        this.getString(R.string.kgamma_r),
+                        this.getString(R.string.kgamma_g),
+                        this.getString(R.string.kgamma_b),
+                        this.getString(R.string.kcal),
+                        this.getString(R.string.REFRESH_SCREEN)
+                };
 
-            MyTools.fillScript(setOnBootFile, values, destinations, "");
-            MyTools.createBootAgent(getActivity(), scriptsDir);
+                MyTools.fillScript(setOnBootFile, values, destinations, "");
+                MyTools.createBootAgent(getActivity(), scriptsDir);
 
-        } catch (Exception e) {
-            File innerLog = new File(MyTools.getDataDir(getActivity()) + File.separator + "inner_log.log");
-            MyTools.log(getActivity(), e.toString(), innerLog.toString());
-            setOnBootFailed();
-        }
+            } catch (Exception e) {
+                File innerLog = new File(MyTools.getDataDir(getActivity()) + File.separator + "inner_log.log");
+                MyTools.log(getActivity(), e.toString(), innerLog.toString());
+                setOnBootFailed();
+            }
 
     }
 
