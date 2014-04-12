@@ -411,9 +411,16 @@ public class GammaControlFragment extends Fragment {
         String comTemp = redTemp + " " + greenTemp + " " + blueTemp;
         MyTools.write(comTemp, this.getString(R.string.kcal));
 
-        if (MODE == 2)
-            MyTools.write(1,
-                    this.getString(R.string.kgamma_b).replace("_b", "_apply"));
+        if ((new File(getString(R.string.REFRESH_SCREEN))).exists())
+            MyTools.execTerminalCommand(new String[] {
+                    String.format("echo 1 > %s", getString(R.string.REFRESH_SCREEN))
+            });
+
+        if ((new File(getString(R.string.kgamma_apply))).exists())
+            MyTools.execTerminalCommand(new String[] {
+                    String.format("echo 1 > %s", getString(R.string.kgamma_apply))
+            });
+
         showOutMsg(0);
     }
 
