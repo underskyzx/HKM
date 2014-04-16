@@ -35,11 +35,11 @@ public class OnBootService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        new AsyncTask<Void, Void, Integer>() {
+        new AsyncTask<Void, Void, String>() {
 
             @Override
-            protected Integer doInBackground(Void... voids) {
-                int errorcode = 0;
+            protected String doInBackground(Void... voids) {
+                String errorcode = "errorcode:";
 
                 PackageManager m = getPackageManager();
                 String dataDir = getPackageName();
@@ -62,13 +62,14 @@ public class OnBootService extends Service {
                                         "sh " + script.toString() + " nodelay"
                                 });
                             }
+                            errorcode += "#scriptsOK";
                         } catch (Exception e) {
                             e.printStackTrace();
-                            errorcode += 1;
+                            errorcode += "-scriptsFailed";
                         }
                     else
-                        errorcode -= 50;
-                else errorcode -= 50;
+                        errorcode += "+noScriptsFound";
+                else errorcode += "+noScriptsFound";
 
                 File sound = new File(getFilesDir() + File.separator
                         + SoundControlFragment.setOnBootFileName);
@@ -77,7 +78,6 @@ public class OnBootService extends Service {
                     try {
                         String soundLock = getString(R.string.SOUND_LOCK_PATH);
                         MyTools.SUhardWrite("0", soundLock);
-
                         String data = (Shell.SU.run("cat " + sound.toString())).get(0);
                         data = data.replace(".", " ");
                         String[] values = data.split("::");
@@ -91,8 +91,6 @@ public class OnBootService extends Service {
                                 case 2:
                                     short b3 = Short.parseShort((value.split(" "))[0]);
                                     short b4 = Short.parseShort((value.split(" "))[1]);
-                                    if (i != 0)
-                                        Shell.SH.run(String.format("echo %s %s >> %s", b3, b4, "/sdcard/HKM_REPORT.txt"));
                                     val = Blackbox.tool1(b3, b4, (byte) 2);
                                     break;
                                 case 1:
@@ -123,55 +121,41 @@ public class OnBootService extends Service {
                                     dir = getString(R.string.CAMMIC_GAIN_PATH);
                                     break;
                             }
-
                             MyTools.SUhardWrite(val, dir);
                         }
-
                         MyTools.SUhardWrite("1", soundLock);
-
+                        Shell.SH.run("echo sound settings applied -- `date +%T` >> /sdcard/HKM.log");
+                        errorcode += "#soundOK";
                     } catch (Exception e) {
                         e.printStackTrace();
-                        errorcode += 2;
+                        errorcode += "-soundFailed";
                     }
                 else
-                    errorcode -= 10;
-
+                    errorcode += "+soundNotFound";
                 return errorcode;
             }
 
             @Override
-            protected void onPostExecute(Integer i) {
-                super.onPostExecute(i);
-                Log.d("TAG", i + "");
-                byte go = 0;
+            protected void onPostExecute(String errorcode) {
+                super.onPostExecute(errorcode);
 
-                switch (i) {
-                    case 2:
-                    case -48:
-                        MyTools.longToast(getApplicationContext(), R.string.toast_failed_soundControl);
-                    case 0:
-                    case -10:
-                    case -50:
-                        MyTools.longToast(getApplicationContext(), R.string.toast_done_succ);
-                        break;
-                    case 1:
-                    case 3:
-                    case -9:
-                        MyTools.longToast(getApplicationContext(), getString(R.string.toast_failed_setOnBoot) + "(" + i + ")");
-                        break;
-                    case -60:
-                    default:
-                        go = -1;
-                        break;
-                }
-                if (go == 0) {
+                if (errorcode.contains("#scriptsOK") || ((errorcode.contains("#soundOK")) && !(errorcode.contains("-scriptsFailed"))))
+                    MyTools.longToast(getApplicationContext(), R.string.toast_done_succ);
+
+                if (errorcode.contains("-scriptsFailed"))
+                    MyTools.longToast(getApplicationContext(), getString(R.string.toast_failed_setOnBoot) + "(" + errorcode + ")");
+
+                if (errorcode.contains("-soundFailed"))
+                    MyTools.longToast(getApplicationContext(), R.string.toast_failed_soundControl);
+
+                if ((errorcode.indexOf("+") == errorcode.lastIndexOf("+")) || errorcode.contains("-")) {
                     MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.io);
                     mediaPlayer.setLooping(false);
                     mediaPlayer.start();
+                } else {
+                    Shell.SH.run("echo nothing to do -- `date +%T` >> /sdcard/HKM.log");
                 }
             }
         }.execute();
-
     }
-
 }
