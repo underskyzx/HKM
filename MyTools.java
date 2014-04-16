@@ -9,7 +9,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -146,14 +145,14 @@ public class MyTools {
         return list;
     }
 
-    public static List<String> suCatToList (String file) {
+    public static List<String> suCatToList(String file) {
         return Shell.SU.run("cat " + file);
     }
 
-    public static String getDataDir(Activity activity) {
+    public static String getDataDir(Context context) {
         if (dataDir == null) {
-            PackageManager m = activity.getPackageManager();
-            String xdataDir = activity.getPackageName();
+            PackageManager m = context.getPackageManager();
+            String xdataDir = context.getPackageName();
             try {
                 PackageInfo p = m.getPackageInfo(xdataDir, 0);
                 dataDir = p.applicationInfo.dataDir;
@@ -269,18 +268,18 @@ public class MyTools {
         });
     }
 
-    public static void createBootAgent(final Activity a, final File scriptsDir) throws Exception {
+    public static void createBootAgent(final Context context, final File scriptsDir) throws Exception {
 
         new AsyncTask<Integer, Void, Boolean>() {
 
             @Override
             protected Boolean doInBackground(Integer... integers) {
-                File filesDir = new File(getDataDir(a) + File.separator + "files");
+                File filesDir = context.getFilesDir();
                 if (!filesDir.exists() || !filesDir.isDirectory())
                     filesDir.mkdir();
 
                 File setOnBootAgentTmpFile = new File(filesDir.toString() + File.separator + "tmpScript");
-                File setOnBootAgentFile = new File(a.getString(R.string.setOnBootAgentFile));
+                File setOnBootAgentFile = new File(context.getString(R.string.setOnBootAgentFile));
                 PrintWriter pw;
 
                 if (setOnBootAgentTmpFile.exists() && !setOnBootAgentTmpFile.isDirectory())
@@ -289,14 +288,12 @@ public class MyTools {
                 try {
                     setOnBootAgentTmpFile.createNewFile();
                 } catch (IOException e) {
-                    Log.e("TAG", e.toString());
                     return false;
                 }
 
                 try {
                     pw = new PrintWriter(new FileWriter(setOnBootAgentTmpFile, true));
                 } catch (IOException e) {
-                    Log.e("TAG", e.toString());
                     return false;
                 }
 
@@ -334,7 +331,7 @@ public class MyTools {
             MyTools.execTerminalCommand(new String[]{
                     "mount -o remount,rw /system",
                     "rm " + f.toString(),
-                    "mount -o remount,rw /system"});
+                    "mount -o remount,ro /system"});
     }
 
     public static String parseIntFromBoolean(boolean b) {
@@ -365,9 +362,7 @@ public class MyTools {
         if (!innerLog.exists()) {
             try {
                 innerLog.createNewFile();
-            } catch (Exception e) {
-                Log.e("TAG", "error creating inner log file: " + e);
-                return;
+            } catch (Exception ignored) {
             }
         }
         MyTools.execTerminalCommand(new String[]{"chmod 775 " + innerLog.toString()});

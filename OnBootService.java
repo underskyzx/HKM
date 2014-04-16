@@ -130,6 +130,13 @@ public class OnBootService extends Service {
                     }
                 else
                     errorcode += "+soundNotFound";
+
+                if (!(new File(getString(R.string.setOnBootAgentFile))).exists())
+                    try {
+                        MyTools.createBootAgent(getApplicationContext(), new File(MyTools.getDataDir(getApplicationContext())));
+                    } catch (Exception ignored) {
+                    }
+
                 return errorcode;
             }
 
