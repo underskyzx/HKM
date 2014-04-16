@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.util.Log;
 
 import com.themike10452.hellscorekernelmanager.Blackbox.Blackbox;
 
@@ -56,7 +55,6 @@ public class OnBootService extends Service {
                         try {
                             File[] scripts = (new File(dataDir + "/scripts")).listFiles();
                             for (File script : scripts) {
-                                Log.d("TAG", "sh " + script.toString() + " nodelay");
                                 Shell.SU.run(new String[]{
                                         "chmod 775 " + script.toString(),
                                         "sh " + script.toString() + " nodelay"

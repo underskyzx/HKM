@@ -7,7 +7,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
@@ -207,7 +206,6 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                 return true;
 
             } catch (MalformedURLException e) {
-                Log.d("TAG", e.toString());
                 e.printStackTrace();
                 return false;
             } catch (IOException e) {

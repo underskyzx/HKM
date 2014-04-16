@@ -3,7 +3,6 @@ package com.themike10452.hellscorekernelmanager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import java.io.File;
 
@@ -27,8 +26,6 @@ public class BootReceiver extends BroadcastReceiver {
                 context.startService(intent);
                 Shell.SH.run(String.format("echo boot service called @ `date %s` >> %s", "+%T", "/sdcard/HKM.log"));
             } catch (Exception e) {
-                Log.d("TAG", "hooooo");
-                e.printStackTrace();
             }
     }
 }
