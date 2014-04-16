@@ -411,11 +411,11 @@ public class GammaControlFragment extends Fragment {
         String comTemp = redTemp + " " + greenTemp + " " + blueTemp;
         MyTools.write(comTemp, this.getString(R.string.kcal));
 
-        if ((new File(getString(R.string.REFRESH_SCREEN))).exists())
+        /*if ((new File(getString(R.string.REFRESH_SCREEN))).exists())
             MyTools.execTerminalCommand(new String[]{
                     String.format("echo 1 > %s", getString(R.string.REFRESH_SCREEN))
             });
-
+        */
         if ((new File(getString(R.string.kgamma_apply))).exists())
             MyTools.execTerminalCommand(new String[]{
                     String.format("echo 1 > %s", getString(R.string.kgamma_apply))
@@ -554,15 +554,14 @@ public class GammaControlFragment extends Fragment {
 
 
                 String[] values = {
-                        redCal, greenCal, blueCal, comTemp, "1"
+                        redCal, greenCal, blueCal, comTemp
                 };
 
                 String[] destinations = {
                         this.getString(R.string.kgamma_r),
                         this.getString(R.string.kgamma_g),
                         this.getString(R.string.kgamma_b),
-                        this.getString(R.string.kcal),
-                        this.getString(R.string.REFRESH_SCREEN)
+                        this.getString(R.string.kcal)
                 };
 
                 MyTools.fillScript(setOnBootFile, values, destinations, "");
