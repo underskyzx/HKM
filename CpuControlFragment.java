@@ -422,8 +422,10 @@ public class CpuControlFragment extends Fragment {
                 saveAll();
                 if (setOnBoot.isChecked())
                     prepareScript(setOnBootFile, true);
-                else
+                else {
                     MyTools.removeFile(setOnBootFile);
+                    MyTools.removeFile(new File(subActivity1.setOnBootFileName));
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
