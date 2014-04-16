@@ -81,6 +81,63 @@ public class Diagnose extends Activity {
     @Override
     public void onStart() {
         super.onStart();
+        refreshLog(1);
+        refresh();
+        final Activity activity = this;
+        if (fix != null) {
+            fix.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new AsyncTask<Void, Void, Boolean>() {
+                        @Override
+                        protected Boolean doInBackground(Void... voids) {
+                            Shell.SU.run("chmod 775 " + getString(R.string.setOnBootAgentFile));
+                            Shell.SU.run("chmod 775 " + dataDir + File.separator + "scripts" + File.separator + "*");
+                            return null;
+                        }
+
+                        @Override
+                        public void onPostExecute(Boolean b) {
+                            MyTools.toast(activity, activity.getString(R.string.toast_done));
+                            refresh();
+                        }
+                    }.execute();
+
+                }
+            });
+        }
+        if (recBoot != null) {
+            recBoot.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new AsyncTask<Void, Void, Boolean>() {
+                        @Override
+                        protected Boolean doInBackground(Void... voids) {
+                            try {
+                                MyTools.createBootAgent(activity, new File(activity.getString(R.string.setOnBootAgentFile)));
+                            } catch (Exception e) {
+                                MyTools.longToast(activity, e.toString());
+                                return false;
+                            }
+                            return true;
+                        }
+
+                        @Override
+                        public void onPostExecute(Boolean completed) {
+                            if (completed)
+                                MyTools.toast(activity, activity.getString(R.string.toast_done_succ));
+                            else
+                                MyTools.toast(activity, activity.getString(R.string.toast_failed));
+                            refresh();
+                        }
+                    }.execute();
+
+                }
+            });
+        }
+    }
+
+    private void refreshLog(final int i) {
         new AsyncTask<Void, Void, Void>() {
             String s = "";
             List<String>
@@ -144,75 +201,24 @@ public class Diagnose extends Activity {
                         p.flush();
                         p.close();
                         ((TextView) findViewById(R.id.bootLog)).setText(s);
-                        new AlertDialog.Builder(thisActivity)
-                                .setMessage(getString(R.string.diagnosis_done)
-                                        .replace("###", Environment.getExternalStorageDirectory() +
-                                                File.separator + getString(R.string.report_file))
-                                        .replace("@@@", getString(R.string.my_email)))
-                                .show();
+                        if (i == 1)
+                            new AlertDialog.Builder(thisActivity)
+                                    .setMessage(getString(R.string.diagnosis_done)
+                                            .replace("###", Environment.getExternalStorageDirectory() +
+                                                    File.separator + getString(R.string.report_file))
+                                            .replace("@@@", getString(R.string.my_email)))
+                                    .show();
 
                     }
                 } catch (IOException ignored) {
                 }
             }
         }.execute();
-
-        refresh();
-        final Activity activity = this;
-        if (fix != null) {
-            fix.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    new AsyncTask<Void, Void, Boolean>() {
-                        @Override
-                        protected Boolean doInBackground(Void... voids) {
-                            Shell.SU.run("chmod 775 " + getString(R.string.setOnBootAgentFile));
-                            Shell.SU.run("chmod 775 " + dataDir + File.separator + "scripts" + File.separator + "*");
-                            return null;
-                        }
-
-                        @Override
-                        public void onPostExecute(Boolean b) {
-                            MyTools.toast(activity, activity.getString(R.string.toast_done));
-                            refresh();
-                        }
-                    }.execute();
-
-                }
-            });
-        }
-        if (recBoot != null) {
-            recBoot.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    new AsyncTask<Void, Void, Boolean>() {
-                        @Override
-                        protected Boolean doInBackground(Void... voids) {
-                            try {
-                                MyTools.createBootAgent(activity, new File(activity.getString(R.string.setOnBootAgentFile)));
-                            } catch (Exception e) {
-                                MyTools.longToast(activity, e.toString());
-                                return false;
-                            }
-                            return true;
-                        }
-
-                        @Override
-                        public void onPostExecute(Boolean completed) {
-                            if (completed)
-                                MyTools.toast(activity, activity.getString(R.string.toast_done_succ));
-                            else
-                                MyTools.toast(activity, activity.getString(R.string.toast_failed));
-                            refresh();
-                        }
-                    }.execute();
-
-                }
-            });
-        }
     }
 
     private void refresh() {
+
+        refreshLog(0);
 
         File scriptsDir = new File(dataDir + File.separator + "scripts");
 
