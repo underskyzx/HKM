@@ -327,7 +327,7 @@ public class MyTools {
     }
 
     public static void removeFile(File f) {
-        if (f.exists() && !f.isDirectory())
+        if (f.exists() && f.isFile())
             MyTools.execTerminalCommand(new String[]{
                     "mount -o remount,rw /system",
                     "rm " + f.toString(),
