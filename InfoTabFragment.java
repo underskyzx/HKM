@@ -225,21 +225,21 @@ public class InfoTabFragment extends Fragment {
             }
         });
 
-        ((Button) view.findViewById(R.id.donationButton)).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.donationButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 MainActivity.showDonationDialog(getActivity());
             }
         });
 
-        ((Button) view.findViewById(R.id.kernelThread)).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.kernelThread).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.kernel_thread))));
             }
         });
 
-        ((Button) view.findViewById(R.id.appThread)).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.appThread).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.app_thread))));
