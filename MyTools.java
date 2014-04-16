@@ -126,7 +126,6 @@ public class MyTools {
             String value = bufferedReader.readLine();
             return Integer.parseInt(value);
         } catch (Exception e) {
-            Log.e("TAG1", "cat exception: " + e);
             return errorCode;
         }
     }
@@ -145,6 +144,10 @@ public class MyTools {
             return list;
         }
         return list;
+    }
+
+    public static List<String> suCatToList (String file) {
+        return Shell.SU.run("cat " + file);
     }
 
     public static String getDataDir(Activity activity) {
