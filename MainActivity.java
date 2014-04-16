@@ -11,16 +11,22 @@ import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
@@ -32,10 +38,18 @@ public class MainActivity extends FragmentActivity implements TabListener {
 
     public static String appVersion;
     private int counter = 0;
+
+    private String[] drawerItems;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+    private ActionBarDrawerToggle drawerToggle;
+
     private ViewPager.OnPageChangeListener ChangeListener = new ViewPager.OnPageChangeListener() {
         @Override
         public void onPageSelected(int arg0) {
             counter = 0;
+            if (mDrawerList != null)
+                mDrawerList.setItemChecked(arg0, true);
             actionBar.setSelectedNavigationItem(arg0);
         }
 
@@ -49,6 +63,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
             counter = 0;
         }
     };
+
     private DBHelper dbH;
     private ActionBar actionBar;
     private ViewPager viewPager;
@@ -66,13 +81,10 @@ public class MainActivity extends FragmentActivity implements TabListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                MyTools.playSound(this);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        if (drawerToggle.onOptionsItemSelected(item))
+            return true;
+        else
+            return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -100,9 +112,8 @@ public class MainActivity extends FragmentActivity implements TabListener {
         actionBar = getActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
-            actionBar.setDisplayShowHomeEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.apptheme_ic_navigation_drawer);
+            //actionBar.setHomeAsUpIndicator(R.drawable.apptheme_ic_navigation_drawer);
         }
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
@@ -137,6 +148,75 @@ public class MainActivity extends FragmentActivity implements TabListener {
         actionBar.addTab(touchControlTab);
         actionBar.addTab(soundControlTab);
         actionBar.addTab(infoTab);
+
+        drawerItems = new String[]{
+                getString(R.string.cpuTab),
+                getString(R.string.gpuTab),
+                getString(R.string.miscTab),
+                getString(R.string.gammaTab),
+                getString(R.string.touchControl),
+                getString(R.string.soundTab),
+                getString(R.string.infoTab),
+                getString(R.string.title_activity_monitoring).toUpperCase()
+        };
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerToggle = new ActionBarDrawerToggle(
+                this,
+                mDrawerLayout,
+                R.drawable.apptheme_ic_navigation_drawer,
+                R.string.app_name,
+                R.string.app_name
+        );
+        mDrawerLayout.setDrawerListener(drawerToggle);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        mDrawerList.setAdapter(new ArrayAdapter<String>(
+                this,
+                R.layout.drawer_list_item,
+                drawerItems
+        ));
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        drawerToggle.syncState();
+    }
+
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            if (i < 7) {
+                mDrawerLayout.closeDrawer(mDrawerList);
+                viewPager.setCurrentItem(i, false);
+            } else {
+                mDrawerLayout.closeDrawer(mDrawerList);
+                switch (i) {
+                    case 7:
+                        new AsyncTask<Void, Void, Void>() {
+
+                            @Override
+                            protected Void doInBackground(Void... voids) {
+                                try {
+                                    Thread.sleep(300);
+                                } catch (InterruptedException ignored) {
+                                }
+                                return null;
+                            }
+
+                            @Override
+                            protected void onPostExecute(Void aVoid) {
+                                super.onPostExecute(aVoid);
+                                startActivity(new Intent(getApplicationContext(), MonitoringActivity.class));
+                            }
+                        }.execute();
+                        break;
+                }
+            }
+        }
+
     }
 
     @Override
@@ -162,6 +242,10 @@ public class MainActivity extends FragmentActivity implements TabListener {
     @Override
     public void onTabSelected(Tab arg0, FragmentTransaction arg1) {
         counter = 0;
+        if (mDrawerList != null)
+            mDrawerList.setItemChecked(arg0.getPosition(), true);
+        if (mDrawerLayout != null)
+            mDrawerLayout.closeDrawer(mDrawerList);
         viewPager.setCurrentItem(arg0.getPosition(), true);
     }
 
@@ -212,7 +296,6 @@ class Adapter extends FragmentStatePagerAdapter {
 
     public Adapter(FragmentManager fm) {
         super(fm);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
