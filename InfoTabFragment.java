@@ -58,7 +58,7 @@ public class InfoTabFragment extends Fragment {
 
             final ArrayList<String> list = new ArrayList<String>();
             final ArrayList<String> links = new ArrayList<String>();
-            if (TestNames.get(0).toLowerCase().contains("new")) {
+            if (TestNames.get(0).toLowerCase().contains("#")) {
                 list.addAll(TestNames);
                 list.addAll(StableNames);
                 links.addAll(TestLinks);
@@ -89,7 +89,7 @@ public class InfoTabFragment extends Fragment {
                             //activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(links.get(i))));
                             String filename = "";
                             try {
-                                filename = (finalItems[i].split(":"))[1].replace("*new*", "").trim();
+                                filename = (finalItems[i].split(":"))[1].replace("#", "").trim();
                             } catch (Exception ignored) {
 
                             }
@@ -243,6 +243,13 @@ public class InfoTabFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.app_thread))));
+            }
+        });
+
+        view.findViewById(R.id.gpCommunity).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.googlePlus_community))));
             }
         });
 
