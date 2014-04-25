@@ -185,23 +185,23 @@ public class MyTools {
 
         PrintWriter p = new PrintWriter(new FileWriter(file));
         p.println("#!/system/bin/sh");
-        p.println("echo " + file.getName() + ": called -- `date +%T` >> /sdcard/HKM.log");
+        p.println("echo `date +%T` -- " + file.getName() + " called >> /sdcard/HKM.log");
         if (flags.contains(":delay:")) {
             p.println("if [ \"`ps | grep -m 1 [a]ndroid`\" ]; then");
             p.println("if [ \"$1\" != \"nodelay\" ]; then");
             p.println("sleep 3");
             p.println("fi");
         } else if (flags.contains(":delay45:")) {
-            p.println("if [ \"`ps | grep -m 1 [a]ndroid`\" ]; then");
             p.println("if [ \"$1\" != \"nodelay\" ]; then");
-            p.println("sleep 45");
+            p.println("echo `date +%T` -- " + file.getName() + " delayed >> /sdcard/HKM.log");
+            p.println("exit 0");
             p.println("fi");
         }
-        p.println("echo " + file.getName() + ": executed -- `date +%T` >> /sdcard/HKM.log");
+        p.println("echo `date +%T` -- " + file.getName() + " executed >> /sdcard/HKM.log");
         for (int i = 0; i < values.length; i++)
             p.println("echo " + values[i] + " > " + destinations[i]);
 
-        if (flags.contains(":delay")) {
+        if (flags.contains(":delay:")) {
             p.println("else");
             p.println("if [ \"$1\" != \"nodelay\" ]; then");
             p.println("sleep 5");
@@ -298,9 +298,9 @@ public class MyTools {
                 }
 
                 pw.println("#!/system/bin/sh");
-                pw.println("if [ \"`cat /proc/version | grep -i hells`\" ];");
+                pw.println("if [[ \"`cat /proc/version | grep -i hells`\" || -e \"/data/force_hkm\" ]];");
                 pw.println("then");
-                pw.println("echo hellsCore Manager: bootime -- `date +%T` > /sdcard/HKM.log");
+                pw.println("echo `date +%T` -- boot_time > /sdcard/HKM.log");
                 pw.println("else");
                 pw.println("exit 99");
                 pw.println("fi");

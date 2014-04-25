@@ -5,7 +5,8 @@ import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
+
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -13,24 +14,22 @@ import java.util.ArrayList;
 
 public class MySQLiteAdapter {
 
-    public static ArrayList<String> getAllProfiles(Context c) {
+    public static ArrayList<String> selectColumn(Context c, String table, String column) {
         DBHelper dbh;
         dbh = new DBHelper(c);
         SQLiteDatabase db = dbh.getWritableDatabase();
         ArrayList<String> ret = new ArrayList<String>();
-        String[] column = {DBHelper.COLOR_PROFILES_TABLE_KEY};
         assert db != null;
-        Cursor crsr = db.query(DBHelper.COLOR_PROFILES_TABLE, column, null, null, null, null, DBHelper.COLOR_PROFILES_TABLE_KEY);
-        ret.add("~CUSTOM~");
+        Cursor crsr = db.query(table, new String[]{column}, null, null, null, null, column);
         while (crsr.moveToNext()) {
-            int ind = crsr.getColumnIndex(DBHelper.COLOR_PROFILES_TABLE_KEY);
+            int ind = crsr.getColumnIndex(column);
             ret.add(crsr.getString(ind));
         }
         db.close();
         return ret;
     }
 
-    public static void createProfiles(Context context) {
+    public static void createColorProfiles(Context context) {
         AssetManager manager = context.getAssets();
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(manager.open("color_profiles.dat")));
@@ -43,8 +42,14 @@ public class MySQLiteAdapter {
                 values = reader.readLine();
             }
             reader.close();
-        } catch (Exception e) {
-            Log.e("TAG", "exception thrown:" + e);
+        } catch (Exception ignored) {
+        }
+    }
+
+    public static void createCpuProfiles(Context context) {
+        String[] profiles = Library.getCpuProfiles();
+        for (String item : profiles) {
+            insert(context, DBHelper.CPU_PROFILES_TABLE, item.split("-"));
         }
     }
 

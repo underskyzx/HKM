@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.MapBuilder;
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -114,8 +115,7 @@ public class GammaControlFragment extends Fragment {
         }
         view.clearFocus();
         setHasOptionsMenu(true);
-        profiles = MySQLiteAdapter.getAllProfiles(getActivity());
-
+        profiles = Library.getColorProfiles(getActivity());
         showOutMsg(-1);
 
         String dataDir = MyTools.getDataDir(getActivity());
@@ -233,8 +233,7 @@ public class GammaControlFragment extends Fragment {
                                 view.clearFocus();
                                 MyTools.toast(getActivity(),
                                         getString(R.string.toast_colorProfileAdded));
-                                profiles = MySQLiteAdapter
-                                        .getAllProfiles(getActivity());
+                                profiles = Library.getColorProfiles(getActivity());
                                 String[] items = new String[profiles.size()];
                                 for (int i = 0; i < items.length; i++)
                                     items[i] = profiles.get(i);
@@ -293,8 +292,7 @@ public class GammaControlFragment extends Fragment {
                                             DBHelper.COLOR_PROFILES_TABLE_KEY,
                                             value);
 
-                                profiles = MySQLiteAdapter
-                                        .getAllProfiles(getActivity());
+                                profiles = Library.getColorProfiles(getActivity());
 
                                 if (toRemove.indexOf(toLoad) >= 0) {
                                     toLoad = "~" + getString(R.string.custom).toUpperCase() + "~";
@@ -341,11 +339,10 @@ public class GammaControlFragment extends Fragment {
                                         if (MySQLiteAdapter.clearTable(getActivity(),
                                                 DBHelper.COLOR_PROFILES_TABLE)) {
                                             MySQLiteAdapter
-                                                    .createProfiles(getActivity());
+                                                    .createColorProfiles(getActivity());
                                             MyTools.toast(getActivity(),
                                                     getString(R.string.toast_done));
-                                            profiles = MySQLiteAdapter
-                                                    .getAllProfiles(getActivity());
+                                            profiles = Library.getColorProfiles(getActivity());
                                         }
 
                                         builder.create().dismiss();
@@ -445,7 +442,7 @@ public class GammaControlFragment extends Fragment {
 
     private void refreshAll() {
 
-        profiles = MySQLiteAdapter.getAllProfiles(getActivity());
+        profiles = Library.getColorProfiles(getActivity());
 
         setOnBoot = (CheckBox) view.findViewById(R.id.setOnBoot);
 

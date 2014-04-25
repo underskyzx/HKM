@@ -1,10 +1,11 @@
 package com.themike10452.hellscorekernelmanager;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.IBinder;
 
@@ -40,15 +41,17 @@ public class OnBootService extends Service {
             protected String doInBackground(Void... voids) {
                 String errorcode = "errorcode:";
 
-                PackageManager m = getPackageManager();
-                String dataDir = getPackageName();
-                PackageInfo p = null;
+                PackageManager m;
+                String dataDir = "/data/data/com.themike10452.hellscorekernelmanager";
+                PackageInfo p;
                 try {
+                    dataDir = getPackageName();
+                    m = getPackageManager();
                     p = m.getPackageInfo(dataDir, 0);
+                    dataDir = p.applicationInfo.dataDir;
                 } catch (PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
+                    Shell.SH.run("echo `date +%T` -- failed to get package name on boot >> /sdcard/HKM.log");
                 }
-                dataDir = p.applicationInfo.dataDir;
 
                 if ((new File(dataDir + "/scripts")).exists())
                     if ((new File(dataDir + "/scripts")).listFiles().length > 0)
@@ -144,22 +147,26 @@ public class OnBootService extends Service {
             protected void onPostExecute(String errorcode) {
                 super.onPostExecute(errorcode);
 
+                NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                Notification.Builder builder = new Notification.Builder(getApplicationContext());
+                builder.setSmallIcon(R.drawable.ic_launcher);
+                builder.setContentTitle(getString(R.string.app_name));
+
                 if (errorcode.contains("#scriptsOK") || ((errorcode.contains("#soundOK")) && !(errorcode.contains("-scriptsFailed"))))
-                    MyTools.longToast(getApplicationContext(), R.string.toast_done_succ);
+                    builder.setContentText(getString(R.string.toast_done_succ));
 
                 if (errorcode.contains("-scriptsFailed"))
-                    MyTools.longToast(getApplicationContext(), getString(R.string.toast_failed_setOnBoot) + "(" + errorcode + ")");
+                    builder.setContentText(getString(R.string.toast_failed_setOnBoot) + "(" + errorcode + ")");
 
                 if (errorcode.contains("-soundFailed"))
-                    MyTools.longToast(getApplicationContext(), R.string.toast_failed_soundControl);
+                    builder.setContentText(getString(R.string.toast_failed_soundControl));
 
                 if ((errorcode.indexOf("+") == errorcode.lastIndexOf("+")) || errorcode.contains("-")) {
-                    MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.io);
-                    mediaPlayer.setLooping(false);
-                    mediaPlayer.start();
+                    manager.notify("HKM", 23, builder.build());
                 } else {
                     Shell.SH.run("echo nothing to do -- `date +%T` >> /sdcard/HKM.log");
                 }
+                stopSelf();
             }
         }.execute();
     }

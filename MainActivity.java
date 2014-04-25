@@ -18,6 +18,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
@@ -101,8 +102,15 @@ public class MainActivity extends FragmentActivity implements TabListener {
         setContentView(R.layout.activity_main);
         dbH = new DBHelper(this);
         if (!DatabaseExists(this, DBHelper.dbName)) {
-            dbH.getWritableDatabase();
-            MySQLiteAdapter.createProfiles(this);
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    dbH.getWritableDatabase();
+                    MySQLiteAdapter.createColorProfiles(getApplicationContext());
+                    MySQLiteAdapter.createCpuProfiles(getApplicationContext());
+                    return null;
+                }
+            }.execute();
         }
 
         viewPager = (ViewPager) findViewById(R.id.pager);
@@ -157,6 +165,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
                 getString(R.string.touchControl),
                 getString(R.string.soundTab),
                 getString(R.string.infoTab),
+                "Profiles".toUpperCase(),
                 getString(R.string.title_activity_monitoring).toUpperCase()
         };
 
@@ -169,6 +178,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
                 R.string.app_name
         );
         mDrawerLayout.setDrawerListener(drawerToggle);
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerList.setAdapter(new ArrayAdapter<String>(
                 this,
@@ -188,6 +198,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
 
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            int delay = 300;
             if (i < 7) {
                 mDrawerLayout.closeDrawer(mDrawerList);
                 viewPager.setCurrentItem(i, false);
@@ -195,23 +206,10 @@ public class MainActivity extends FragmentActivity implements TabListener {
                 mDrawerLayout.closeDrawer(mDrawerList);
                 switch (i) {
                     case 7:
-                        new AsyncTask<Void, Void, Void>() {
-
-                            @Override
-                            protected Void doInBackground(Void... voids) {
-                                try {
-                                    Thread.sleep(300);
-                                } catch (InterruptedException ignored) {
-                                }
-                                return null;
-                            }
-
-                            @Override
-                            protected void onPostExecute(Void aVoid) {
-                                super.onPostExecute(aVoid);
-                                startActivity(new Intent(getApplicationContext(), MonitoringActivity.class));
-                            }
-                        }.execute();
+                        activityDelayed(new Intent(getApplicationContext(), ProfilesActivity.class), delay);
+                        break;
+                    case 8:
+                        activityDelayed(new Intent(getApplicationContext(), MonitoringActivity.class), delay);
                         break;
                 }
             }
@@ -262,7 +260,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
                 .setPositiveButton(getString(R.string.button_leave), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        stopService(new Intent(Intent.ACTION_MAIN));
+                        //stopService(new Intent(Intent.ACTION_MAIN));
                         finish();
                     }
                 })
@@ -288,6 +286,32 @@ public class MainActivity extends FragmentActivity implements TabListener {
         ((EditText) dialog.findViewById(R.id.message))
                 .setText(activity.getString(R.string.donation_email));
         dialog.show();
+    }
+
+    private void activityDelayed(final Intent intent, final int delay) {
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                mDrawerLayout.closeDrawer(mDrawerList);
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException ignored) {
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                startActivity(intent);
+            }
+        }.execute();
     }
 
 }

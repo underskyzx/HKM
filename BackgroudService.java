@@ -4,6 +4,8 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import java.io.File;
+
 public class BackgroudService extends Service {
 
     private String[] Values;
@@ -67,6 +69,10 @@ public class BackgroudService extends Service {
                     MyTools.write(Values[1], kgamma_g);
                     MyTools.write(Values[2], kgamma_b);
                     MyTools.write(Values[3], kcal);
+                    if ((new File(getString(R.string.kgamma_apply))).exists())
+                        MyTools.execTerminalCommand(new String[]{
+                                String.format("echo 1 > %s", getString(R.string.kgamma_apply))
+                        });
                     try {
                         long cycle = 15000;
                         Thread.sleep(cycle);

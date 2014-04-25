@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.MapBuilder;
+import com.themike10452.hellscorekernelmanager.Blackbox.Blackbox;
 
 public class BaseActivity extends Activity {
 
@@ -33,7 +34,7 @@ public class BaseActivity extends Activity {
 
 
         String kernel = MyTools.readFile("/proc/version");
-        if (kernel.toLowerCase().contains("hells")) {
+        if (kernel.toLowerCase().contains("hells") || Blackbox.tool4(getApplicationContext())) {
             Intent i = new Intent(this, MainActivity.class);
             new ProgressTask(this, i).execute();
         } else {

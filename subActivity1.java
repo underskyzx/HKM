@@ -34,7 +34,6 @@ public class subActivity1 extends ListActivity {
 
     public static File getScriptPath(Activity c) {
         String dataDir = MyTools.getDataDir(c);
-
         return new File(dataDir + File.separator + "scripts" + File.separator + setOnBootFileName);
     }
 
@@ -54,7 +53,11 @@ public class subActivity1 extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.listview);
-        getActionBar().setHomeButtonEnabled(true);
+        try {
+            getActionBar().setHomeButtonEnabled(true);
+        } catch (Exception ignored) {
+            
+        }
         String s = getIntent().getExtras().getString("key2");
         s = s.replaceFirst(s.charAt(0) + "", "" + Character.toUpperCase(s.charAt(0)));
         getActionBar().setTitle(s + " Tweaks");

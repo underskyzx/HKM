@@ -12,6 +12,8 @@ import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.themike10452.hellscorekernelmanager.Blackbox.Blackbox;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -137,12 +139,12 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
         if (urlConnection == null)
             return false;
         killedByMaster = true;
-        new Thread(new Runnable() {
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 urlConnection.disconnect();
             }
-        }).start();
+        }).start();*/
         return (new File(Environment.getExternalStorageDirectory().getPath() +
                 File.separator + act.getString(R.string.kernel_download_location)))
                 .delete();
@@ -169,7 +171,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
         if (strings[0].equals("mode1"))
             try {
 
-                if (!force && !(MyTools.readFile("/proc/version").toLowerCase().contains("hellsgod")))
+                if (!force && !MyTools.readFile("/proc/version").toLowerCase().contains("hellsgod") && !Blackbox.tool4(activity))
                     return false;
 
                 URL url = new URL(activity.getString(R.string.kernel_list_url).trim());
@@ -198,8 +200,12 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                 while ((bufferLength = inputStream.read(buffer)) > 0) {
                     fileOutput.write(buffer, 0, bufferLength);
                     downloadedSize += bufferLength;
-                    progressDialog.setProgress(downloadedSize);
-
+                    progressDialog.setProgress(downloadedSize); //display progress
+                    if (killedByMaster) { //stop the download
+                        inputStream.close();
+                        fileOutput.close();
+                        urlConnection.disconnect();
+                    }
                 }
                 fileOutput.close();
                 urlConnection.disconnect();
@@ -215,7 +221,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
         else if (strings[0].equals("mode2"))
             try {
 
-                if (!force && !(MyTools.readFile("/proc/version").toLowerCase().contains("hellsgod")))
+                if (!force && !MyTools.readFile("/proc/version").toLowerCase().contains("hellsgod") && !Blackbox.tool4(activity))
                     return false;
 
                 (dialog.findViewById(R.id.abortButton)).setOnClickListener(new View.OnClickListener() {
@@ -229,7 +235,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                 if (strings[2] != null)
                     filename = strings[2];
 
-                Shell.SU.run("mount -o remount rw /cache");
+                Shell.SU.run("mount -o remount,rw /cache");
 
                 URL url = new URL(strings[1]);
 
@@ -254,6 +260,11 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                     fileOutput.write(buffer, 0, bufferLength);
                     downloadedSize += bufferLength;
                     publishProgress(downloadedSize, totalSize); //display progress
+                    if (killedByMaster) { //stop the download
+                        inputStream.close();
+                        fileOutput.close();
+                        urlConnection.disconnect();
+                    }
                 }
 
                 fileOutput.close();
