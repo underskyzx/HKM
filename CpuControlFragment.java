@@ -96,7 +96,7 @@ public class CpuControlFragment extends Fragment {
     private final View.OnClickListener boostedCpusButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            final String[] MAKO_CORES = {"1", "2", "3", "4"};
+            final String[] MAKO_CORES = {"0", "1", "2", "3", "4"};
             AlertDialog.Builder builder = new AlertDialog.Builder(
                     getActivity());
             builder.setTitle(getString(R.string.alias_boosted_cpus));
@@ -104,7 +104,7 @@ public class CpuControlFragment extends Fragment {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            boostedCpusDisplay.setText("" + (which + 1));
+                            boostedCpusDisplay.setText("" + (which));
                         }
                     }
             );
