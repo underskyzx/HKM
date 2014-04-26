@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.themike10452.hellscorekernelmanager.Blackbox.Blackbox;
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -68,7 +69,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                                         .replace("###",
                                                 Environment.getExternalStorageDirectory().getPath() +
                                                         File.separator +
-                                                        activity.getString(R.string.kernel_download_location)
+                                                        Library.kernel_download_location
                                         ))
                                 .setCancelable(true)
                                 .setTitle(activity.getString(R.string.toast_done))
@@ -88,7 +89,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                             .replace("###",
                                     Environment.getExternalStorageDirectory().getPath() +
                                             File.separator +
-                                            activity.getString(R.string.kernel_download_location)
+                                            Library.kernel_download_location
                             ))
                     .setCancelable(true)
                     .setTitle(activity.getString(R.string.toast_done))
@@ -102,7 +103,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                 "openrecoveryscript");
 
         File file = new File(Environment.getExternalStorageDirectory().getPath() +
-                File.separator + activity.getString(R.string.kernel_download_location));
+                File.separator + Library.kernel_download_location);
         if (file.isFile() && file.exists()) {
             Shell.SU.run(new String[]{
                     "mount -o remount rw /cache",
@@ -139,14 +140,8 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
         if (urlConnection == null)
             return false;
         killedByMaster = true;
-        /*new Thread(new Runnable() {
-            @Override
-            public void run() {
-                urlConnection.disconnect();
-            }
-        }).start();*/
         return (new File(Environment.getExternalStorageDirectory().getPath() +
-                File.separator + act.getString(R.string.kernel_download_location)))
+                File.separator + Library.kernel_download_location))
                 .delete();
     }
 
@@ -174,17 +169,14 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                 if (!force && !MyTools.readFile("/proc/version").toLowerCase().contains("hellsgod") && !Blackbox.tool4(activity))
                     return false;
 
-                URL url = new URL(activity.getString(R.string.kernel_list_url).trim());
+                URL url = new URL(Library.kernel_list_url.trim());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
-
-                //urlConnection.setRequestMethod("GET"); << useless
-                //urlConnection.setDoOutput(true); << useless
 
                 urlConnection.connect();
 
                 File file = new File(Environment.getExternalStorageDirectory().getPath() +
-                        File.separator + activity.getString(R.string.hellscore_update_file));
+                        File.separator + Library.hellscore_update_file);
 
                 FileOutputStream fileOutput = new FileOutputStream(file);
 
@@ -244,7 +236,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                 urlConnection.connect();
 
                 File file = new File(Environment.getExternalStorageDirectory().getPath() +
-                        File.separator + activity.getString(R.string.kernel_download_location));
+                        File.separator + Library.kernel_download_location);
 
                 FileOutputStream fileOutput = new FileOutputStream(file);
 

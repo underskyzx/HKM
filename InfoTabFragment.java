@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.MapBuilder;
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,8 +37,7 @@ public class InfoTabFragment extends Fragment {
 
     public static void postUpdates(final Activity activity) {
 
-        File listFile = new File(Environment.getExternalStorageDirectory().getPath() + File.separator +
-                activity.getString(R.string.hellscore_update_file));
+        File listFile = new File(Environment.getExternalStorageDirectory().getPath() + File.separator + Library.hellscore_update_file);
         try {
             ArrayList<String> content = MyTools.catToList(listFile.toString());
             listFile.delete();
@@ -86,7 +86,6 @@ public class InfoTabFragment extends Fragment {
                     .setItems(items, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            //activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(links.get(i))));
                             String filename = "";
                             try {
                                 filename = (finalItems[i].split(":"))[1].replace("#", "").trim();
@@ -235,21 +234,21 @@ public class InfoTabFragment extends Fragment {
         view.findViewById(R.id.kernelThread).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.kernel_thread))));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Library.kernel_thread)));
             }
         });
 
         view.findViewById(R.id.appThread).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.app_thread))));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Library.app_thread)));
             }
         });
 
         view.findViewById(R.id.gpCommunity).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.googlePlus_community))));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Library.googlePlus_community)));
             }
         });
 

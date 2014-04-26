@@ -31,6 +31,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 import java.io.File;
 
@@ -43,8 +44,6 @@ public class MainActivity extends FragmentActivity implements TabListener {
     private String[] drawerItems;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
-    private ActionBarDrawerToggle drawerToggle;
-
     private ViewPager.OnPageChangeListener ChangeListener = new ViewPager.OnPageChangeListener() {
         @Override
         public void onPageSelected(int arg0) {
@@ -64,7 +63,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
             counter = 0;
         }
     };
-
+    private ActionBarDrawerToggle drawerToggle;
     private DBHelper dbH;
     private ActionBar actionBar;
     private ViewPager viewPager;
@@ -72,6 +71,22 @@ public class MainActivity extends FragmentActivity implements TabListener {
     private static boolean DatabaseExists(ContextWrapper context, String dbName) {
         File dbFile = context.getDatabasePath(dbName);
         return dbFile.exists();
+    }
+
+    public static void showDonationDialog(final Activity activity) {
+        Dialog dialog = new Dialog(activity);
+        dialog.setTitle(activity.getString(R.string.title_donation));
+        dialog.setContentView(R.layout.halp);
+        dialog.setCancelable(true);
+        ((Button) dialog.findViewById(R.id.button_donate)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Library.donation_link)));
+            }
+        });
+        ((EditText) dialog.findViewById(R.id.message))
+                .setText(Library.donation_email);
+        dialog.show();
     }
 
     @Override
@@ -111,6 +126,18 @@ public class MainActivity extends FragmentActivity implements TabListener {
                     return null;
                 }
             }.execute();
+        } else {
+            dbH.getWritableDatabase();
+            if (DBHelper.FLAG_CHANGES_MADE) {
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        MySQLiteAdapter.createColorProfiles(getApplicationContext());
+                        MySQLiteAdapter.createCpuProfiles(getApplicationContext());
+                        return null;
+                    }
+                }.execute();
+            }
         }
 
         viewPager = (ViewPager) findViewById(R.id.pager);
@@ -121,7 +148,6 @@ public class MainActivity extends FragmentActivity implements TabListener {
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
-            //actionBar.setHomeAsUpIndicator(R.drawable.apptheme_ic_navigation_drawer);
         }
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
@@ -165,7 +191,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
                 getString(R.string.touchControl),
                 getString(R.string.soundTab),
                 getString(R.string.infoTab),
-                "Profiles".toUpperCase(),
+                getString(R.string.title_activity_profiles).toUpperCase(),
                 getString(R.string.title_activity_monitoring).toUpperCase()
         };
 
@@ -192,29 +218,6 @@ public class MainActivity extends FragmentActivity implements TabListener {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         drawerToggle.syncState();
-    }
-
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-
-        @Override
-        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            int delay = 300;
-            if (i < 7) {
-                mDrawerLayout.closeDrawer(mDrawerList);
-                viewPager.setCurrentItem(i, false);
-            } else {
-                mDrawerLayout.closeDrawer(mDrawerList);
-                switch (i) {
-                    case 7:
-                        activityDelayed(new Intent(getApplicationContext(), ProfilesActivity.class), delay);
-                        break;
-                    case 8:
-                        activityDelayed(new Intent(getApplicationContext(), MonitoringActivity.class), delay);
-                        break;
-                }
-            }
-        }
-
     }
 
     @Override
@@ -272,22 +275,6 @@ public class MainActivity extends FragmentActivity implements TabListener {
                 .show();
     }
 
-    public static void showDonationDialog(final Activity activity) {
-        Dialog dialog = new Dialog(activity);
-        dialog.setTitle(activity.getString(R.string.title_donation));
-        dialog.setContentView(R.layout.halp);
-        dialog.setCancelable(true);
-        ((Button) dialog.findViewById(R.id.button_donate)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(activity.getString(R.string.donation_link))));
-            }
-        });
-        ((EditText) dialog.findViewById(R.id.message))
-                .setText(activity.getString(R.string.donation_email));
-        dialog.show();
-    }
-
     private void activityDelayed(final Intent intent, final int delay) {
         new AsyncTask<Void, Void, Void>() {
 
@@ -312,6 +299,29 @@ public class MainActivity extends FragmentActivity implements TabListener {
                 startActivity(intent);
             }
         }.execute();
+    }
+
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            int delay = 300;
+            if (i < 7) {
+                mDrawerLayout.closeDrawer(mDrawerList);
+                viewPager.setCurrentItem(i, false);
+            } else {
+                mDrawerLayout.closeDrawer(mDrawerList);
+                switch (i) {
+                    case 7:
+                        activityDelayed(new Intent(getApplicationContext(), ProfilesActivity.class), delay);
+                        break;
+                    case 8:
+                        activityDelayed(new Intent(getApplicationContext(), MonitoringActivity.class), delay);
+                        break;
+                }
+            }
+        }
+
     }
 
 }

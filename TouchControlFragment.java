@@ -14,6 +14,8 @@ import android.widget.CheckBox;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
+
 import java.io.File;
 
 public class TouchControlFragment extends Fragment {
@@ -67,7 +69,7 @@ public class TouchControlFragment extends Fragment {
         String dataDir = MyTools.getDataDir(getActivity());
         scriptsDir = new File(dataDir + File.separator + "scripts");
         setOnBootFile = new File(scriptsDir + File.separator + setOnBootFileName);
-        setOnBootAgent = new File(this.getString(R.string.setOnBootAgentFile));
+        setOnBootAgent = new File(Library.setOnBootAgentFile);
 
         refreshAll();
 
@@ -75,8 +77,8 @@ public class TouchControlFragment extends Fragment {
     }
 
     private void saveAll() {
-        MyTools.write(MyTools.parseIntFromBoolean(dt2wSwitch.isChecked()), this.getString(R.string.DT2W_PATH));
-        MyTools.write(MyTools.parseIntFromBoolean(s2wSwitch.isChecked()), this.getString(R.string.S2W_PATH));
+        MyTools.write(MyTools.parseIntFromBoolean(dt2wSwitch.isChecked()), Library.DT2W_PATH);
+        MyTools.write(MyTools.parseIntFromBoolean(s2wSwitch.isChecked()), Library.S2W_PATH);
         showOutMsg(0);
     }
 
@@ -88,9 +90,9 @@ public class TouchControlFragment extends Fragment {
     }
 
     private void refreshAll() {
-        int tmpValue = MyTools.catInt(this.getString(R.string.DT2W_PATH), -1);
+        int tmpValue = MyTools.catInt(Library.DT2W_PATH, -1);
         dt2wSwitch.setChecked(parseBooleanFromInt(tmpValue));
-        tmpValue = MyTools.catInt(this.getString(R.string.S2W_PATH), -1);
+        tmpValue = MyTools.catInt(Library.S2W_PATH, -1);
         s2wSwitch.setChecked(parseBooleanFromInt(tmpValue));
         setOnBoot.setChecked(
                 setOnBootFile.exists() && setOnBootAgent.exists() &&
@@ -114,26 +116,26 @@ public class TouchControlFragment extends Fragment {
             String[] values;
             String[] destinations;
 
-            if (MyTools.catInt(this.getString(R.string.DT2W_PATH), -1) != -1) {
-                if (MyTools.catInt(this.getString(R.string.S2W_PATH), -1) != -1) {
+            if (MyTools.catInt(Library.DT2W_PATH, -1) != -1) {
+                if (MyTools.catInt(Library.S2W_PATH, -1) != -1) {
                     values = new String[2];
                     destinations = new String[2];
-                    values[0] = MyTools.readFile(this.getString(R.string.DT2W_PATH));
-                    values[1] = MyTools.readFile(this.getString(R.string.S2W_PATH));
-                    destinations[0] = this.getString(R.string.DT2W_PATH);
-                    destinations[1] = this.getString(R.string.S2W_PATH);
+                    values[0] = MyTools.readFile(Library.DT2W_PATH);
+                    values[1] = MyTools.readFile(Library.S2W_PATH);
+                    destinations[0] = Library.DT2W_PATH;
+                    destinations[1] = Library.S2W_PATH;
                 } else {
                     values = new String[1];
                     destinations = new String[1];
-                    values[0] = MyTools.readFile(this.getString(R.string.DT2W_PATH));
-                    destinations[0] = this.getString(R.string.DT2W_PATH);
+                    values[0] = MyTools.readFile(Library.DT2W_PATH);
+                    destinations[0] = Library.DT2W_PATH;
                 }
             } else {
-                if (MyTools.catInt(this.getString(R.string.S2W_PATH), -1) != -1) {
+                if (MyTools.catInt(Library.S2W_PATH, -1) != -1) {
                     values = new String[1];
                     destinations = new String[1];
-                    values[0] = MyTools.readFile(this.getString(R.string.S2W_PATH));
-                    destinations[0] = this.getString(R.string.S2W_PATH);
+                    values[0] = MyTools.readFile(Library.S2W_PATH);
+                    destinations[0] = Library.S2W_PATH;
                 } else {
                     values = null;
                     destinations = null;

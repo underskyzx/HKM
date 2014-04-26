@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 
 import com.themike10452.hellscorekernelmanager.Blackbox.Blackbox;
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 import java.io.File;
 
@@ -77,7 +78,7 @@ public class OnBootService extends Service {
 
                 if (sound.exists() && sound.isFile())
                     try {
-                        String soundLock = getString(R.string.SOUND_LOCK_PATH);
+                        String soundLock = Library.SOUND_LOCK_PATH;
                         MyTools.SUhardWrite("0", soundLock);
                         String data = (Shell.SU.run("cat " + sound.toString())).get(0);
                         data = data.replace(".", " ");
@@ -107,19 +108,19 @@ public class OnBootService extends Service {
                             }
                             switch (i) {
                                 case 0:
-                                    dir = getString(R.string.HP_GAIN_PATH);
+                                    dir = Library.HP_GAIN_PATH;
                                     break;
                                 case 1:
-                                    dir = getString(R.string.HP_PA_GAIN_PATH);
+                                    dir = Library.HP_PA_GAIN_PATH;
                                     break;
                                 case 2:
-                                    dir = getString(R.string.SPEAKER_GAIN_PATH);
+                                    dir = Library.SPEAKER_GAIN_PATH;
                                     break;
                                 case 3:
-                                    dir = getString(R.string.MIC_GAIN_PATH);
+                                    dir = Library.MIC_GAIN_PATH;
                                     break;
                                 case 4:
-                                    dir = getString(R.string.CAMMIC_GAIN_PATH);
+                                    dir = Library.CAMMIC_GAIN_PATH;
                                     break;
                             }
                             MyTools.SUhardWrite(val, dir);
@@ -134,7 +135,7 @@ public class OnBootService extends Service {
                 else
                     errorcode += "+soundNotFound";
 
-                if (!(new File(getString(R.string.setOnBootAgentFile))).exists())
+                if (!(new File(Library.setOnBootAgentFile)).exists())
                     try {
                         MyTools.createBootAgent(getApplicationContext(), new File(MyTools.getDataDir(getApplicationContext())));
                     } catch (Exception ignored) {

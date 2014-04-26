@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DBHelper extends SQLiteOpenHelper {
 
+    public static boolean FLAG_CHANGES_MADE;
+
     public static final String dbName = "hellscore";
     public static final String COLOR_PROFILES_TABLE = "color_profiles";
     public static final String CPU_PROFILES_TABLE = "cpu_profiles";
@@ -33,8 +35,7 @@ public class DBHelper extends SQLiteOpenHelper {
             + CPU_PROFILES_TABLE_KEY + " VARCHAR(255) PRIMARY KEY, "
             + CPU_PROFILES_TABLE_COLUMN1 + " VARCHAR(255));";
 
-    private static final int dbVersion = 2;
-
+    public static final int dbVersion = 2;
 
     public DBHelper(Context context) {
         super(context, dbName, null, dbVersion);
@@ -52,6 +53,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        FLAG_CHANGES_MADE = true;
         switch (oldVersion) {
             case 1:
                 db.execSQL(CREATE_TABLE3);

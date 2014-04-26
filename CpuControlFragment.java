@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.MapBuilder;
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -156,7 +157,7 @@ public class CpuControlFragment extends Fragment {
             Intent i = new Intent(getActivity(), subActivity1.class);
             Bundle b = new Bundle();
             try {
-                String g = MyTools.readFile(getResources().getString(R.string.GOV0));
+                String g = MyTools.readFile(Library.GOV0);
                 File gov = new File("/sys/devices/system/cpu/cpufreq/" + g);
                 if (!gov.exists() || !gov.isDirectory()) throw new Exception();
                 MyTools.execTerminalCommand(new String[]{
@@ -437,21 +438,21 @@ public class CpuControlFragment extends Fragment {
         super.onCreate(bundle);
 
         try {
-            String s = MyTools.readFile(this.getString(R.string.AVAIL_FREQ_PATH));
+            String s = MyTools.readFile(Library.AVAIL_FREQ_PATH);
             AVAIL_FREQ = s.split(" ");
         } catch (Exception e) {
             AVAIL_FREQ = new String[]{"n/a", "n/a"};
             MyTools.longToast(getActivity(), "AVAIL_FREQ: " + e.toString());
         }
         try {
-            String s = MyTools.readFile(this.getString(R.string.AVAIL_GOV_PATH));
+            String s = MyTools.readFile(Library.AVAIL_GOV_PATH);
             AVAIL_GOV = s.split(" ");
         } catch (Exception e) {
             AVAIL_GOV = new String[]{"n/a", "n/a"};
             MyTools.longToast(getActivity(), "AVAIL_GOV: " + e.toString());
         }
 
-        vdd_list = MyTools.catToList(this.getString(R.string.VDD_LEVELS));
+        vdd_list = MyTools.catToList(Library.VDD_LEVELS);
         freqs = new String[vdd_list.size()];
         vols = new String[vdd_list.size()];
         for (int i = 0; i < freqs.length; i++) {
@@ -513,7 +514,7 @@ public class CpuControlFragment extends Fragment {
                                 .setPositiveButton(getString(R.string.button_getBusybox), new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
-                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.stericson_busybox))));
+                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Library.stericson_busybox)));
                                         EasyTracker easyTracker = EasyTracker.getInstance(getActivity());
                                         easyTracker.send(MapBuilder
                                                         .createEvent("Busybox not found",
@@ -534,7 +535,7 @@ public class CpuControlFragment extends Fragment {
 
     private void initialize() {
 
-        File scalingmaxfreq = new File(getString(R.string.MAX_FREQ0_PATH));
+        File scalingmaxfreq = new File(Library.MAX_FREQ0_PATH);
         if (!scalingmaxfreq.canRead() || !scalingmaxfreq.canWrite())
             MyTools.execTerminalCommand(new String[]{"chmod 666 " + scalingmaxfreq.toString()});
 
@@ -545,7 +546,7 @@ public class CpuControlFragment extends Fragment {
         dataDir = MyTools.getDataDir(getActivity());
         scriptsDir = new File(dataDir + File.separator + "scripts");
         setOnBootFile = new File(scriptsDir + File.separator + setOnBootFileName);
-        setOnBootAgent = new File(this.getString(R.string.setOnBootAgentFile));
+        setOnBootAgent = new File(Library.setOnBootAgentFile);
 
         // Profiles
         saveProfile = (Button) view.findViewById(R.id.storeSettingsButton);
@@ -640,7 +641,7 @@ public class CpuControlFragment extends Fragment {
 
         int n;
 
-        ArrayList<String> tmpVDD = MyTools.catToList(this.getString(R.string.VDD_LEVELS));
+        ArrayList<String> tmpVDD = MyTools.catToList(Library.VDD_LEVELS);
 
         if (tmpVDD.size() <= volSeekBars.size()) {
             for (n = 0; n < tmpVDD.size(); n++) {
@@ -707,34 +708,39 @@ public class CpuControlFragment extends Fragment {
         String mxc = AVAIL_FREQ[MAX_FREQ.getProgress()];
         String mnc = AVAIL_FREQ[MIN_FREQ.getProgress()];
 
-        String[] govArray = {this.getString(R.string.GOV0),
-                this.getString(R.string.GOV1), this.getString(R.string.GOV2),
-                this.getString(R.string.GOV3)};
+        String[] govArray = {
+                Library.GOV0,
+                Library.GOV1,
+                Library.GOV2,
+                Library.GOV3
+        };
         for (String GOV : govArray)
             MyTools.write(gov, GOV);
 
         String[] freqArray1 = {
-                this.getString(R.string.MAX_FREQ0_PATH),
-                this.getString(R.string.MAX_FREQ1_PATH),
-                this.getString(R.string.MAX_FREQ2_PATH),
-                this.getString(R.string.MAX_FREQ3_PATH)};
+                Library.MAX_FREQ0_PATH,
+                Library.MAX_FREQ1_PATH,
+                Library.MAX_FREQ2_PATH,
+                Library.MAX_FREQ3_PATH
+        };
         for (String freq : freqArray1)
             MyTools.write(mxc, freq);
 
         String[] freqArray2 = {
-                this.getString(R.string.MIN_FREQ0_PATH),
-                this.getString(R.string.MIN_FREQ1_PATH),
-                this.getString(R.string.MIN_FREQ2_PATH),
-                this.getString(R.string.MIN_FREQ3_PATH)};
+                Library.MIN_FREQ0_PATH,
+                Library.MIN_FREQ1_PATH,
+                Library.MIN_FREQ2_PATH,
+                Library.MIN_FREQ3_PATH
+        };
         for (String freq : freqArray2)
             MyTools.write(mnc, freq);
 
         String cmnc = minCpusDisplay.getText().toString();
         String cmxc = maxCpusDisplay.getText().toString();
         String cbsc = boostedCpusDisplay.getText().toString();
-        MyTools.write(cmnc, this.getString(R.string.MIN_CPUS_ONLINE_PATH));
-        MyTools.write(cmxc, this.getString(R.string.MAX_CPUS_ONLINE_PATH));
-        MyTools.write(cbsc, this.getString(R.string.BOOSTED_CPUS_PATH));
+        MyTools.write(cmnc, Library.MIN_CPUS_ONLINE_PATH);
+        MyTools.write(cmxc, Library.MAX_CPUS_ONLINE_PATH);
+        MyTools.write(cbsc, Library.BOOSTED_CPUS_PATH);
 
         if (susfUnlocked) {
             String susf;
@@ -745,14 +751,16 @@ public class CpuControlFragment extends Fragment {
                 susf = "n/a";
             }
             susf = scaleUp(susf);
-            MyTools.write(susf, this.getString(R.string.SUSPEND_FREQ_PATH));
+            MyTools.write(susf, Library.SUSPEND_FREQ_PATH);
         }
 
         Switch[] s = {cpuIdle_c0, cpuIdle_c1, cpuIdle_c2, cpuIdle_c3};
-        String[] t = {this.getString(R.string.CPU_IDLE_C0_PATH),
-                this.getString(R.string.CPU_IDLE_C1_PATH),
-                this.getString(R.string.CPU_IDLE_C2_PATH),
-                this.getString(R.string.CPU_IDLE_C3_PATH)};
+        String[] t = {
+                Library.CPU_IDLE_C0_PATH,
+                Library.CPU_IDLE_C1_PATH,
+                Library.CPU_IDLE_C2_PATH,
+                Library.CPU_IDLE_C3_PATH
+        };
 
         for (int i = 0; i < s.length; i++) {
 
@@ -762,15 +770,14 @@ public class CpuControlFragment extends Fragment {
                 tmp = "1";
 
             for (int j = 0; j <= 3; j++)
-                MyTools.write(tmp, this.getString(R.string.CPU_IDLE_TRUNK_PATH)
-                        + "cpu" + j + t[i]);
+                MyTools.write(tmp, Library.CPU_IDLE_TRUNK_PATH + "cpu" + j + t[i]);
         }
 
         for (int i = 0; i < volDisplay.size(); i++) {
             try {
                 String vdd = freqDisplay.get(i).getText().toString() + " "
                         + volDisplay.get(i).getText().toString();
-                MyTools.write(vdd, this.getString(R.string.VDD_LEVELS));
+                MyTools.write(vdd, Library.VDD_LEVELS);
             } catch (Exception e) {
                 MyTools.longToast(getActivity(), e.toString());
             }
@@ -782,20 +789,20 @@ public class CpuControlFragment extends Fragment {
     void refreshAll() {
 
         try {
-            cpuGovDisplay.setText(MyTools.readFile(this.getString(R.string.GOV0)));
+            cpuGovDisplay.setText(MyTools.readFile(Library.GOV0));
         } catch (Exception e) {
             cpuGovDisplay.setText("n/a");
         }
         String CURRENT_MAX_FREQ;
         try {
-            MyTools.execTerminalCommand(new String[]{"chmod 666 " + this.getString(R.string.MAX_FREQ0_PATH)});
-            CURRENT_MAX_FREQ = MyTools.readFile(this.getString(R.string.MAX_FREQ0_PATH).trim());
+            MyTools.execTerminalCommand(new String[]{"chmod 666 " + Library.MAX_FREQ0_PATH});
+            CURRENT_MAX_FREQ = MyTools.readFile(Library.MAX_FREQ0_PATH.trim());
         } catch (Exception e) {
             CURRENT_MAX_FREQ = "n/a";
         }
         String CURRENT_MIN_FREQ;
         try {
-            CURRENT_MIN_FREQ = MyTools.readFile(this.getString(R.string.MIN_FREQ0_PATH).trim());
+            CURRENT_MIN_FREQ = MyTools.readFile(Library.MIN_FREQ0_PATH.trim());
         } catch (Exception e) {
             CURRENT_MIN_FREQ = "n/a";
         }
@@ -812,39 +819,38 @@ public class CpuControlFragment extends Fragment {
         }
 
         try {
-            minCpusDisplay.setText(MyTools.readFile(this
-                    .getString(R.string.MIN_CPUS_ONLINE_PATH)));
+            minCpusDisplay.setText(MyTools.readFile(Library.MIN_CPUS_ONLINE_PATH));
         } catch (Exception e) {
             minCpusDisplay.setText("n/a");
         }
         try {
-            maxCpusDisplay.setText(MyTools.readFile(this
-                    .getString(R.string.MAX_CPUS_ONLINE_PATH)));
+            maxCpusDisplay.setText(MyTools.readFile(Library.MAX_CPUS_ONLINE_PATH));
         } catch (Exception e) {
             maxCpusDisplay.setText("n/a");
         }
         try {
-            boostedCpusDisplay.setText(MyTools.readFile(this
-                    .getString(R.string.BOOSTED_CPUS_PATH)));
+            boostedCpusDisplay.setText(MyTools.readFile(Library.BOOSTED_CPUS_PATH));
         } catch (Exception e) {
             boostedCpusDisplay.setText("n/a");
         }
         try {
-            suspendFreqDisplay.setText(scaleDown(MyTools.readFile(this.getString(R.string.SUSPEND_FREQ_PATH))));
+            suspendFreqDisplay.setText(scaleDown(MyTools.readFile(Library.SUSPEND_FREQ_PATH)));
         } catch (Exception e) {
             suspendFreqDisplay.setText("n/a");
         }
 
         Switch[] s = {cpuIdle_c0, cpuIdle_c1, cpuIdle_c2, cpuIdle_c3};
-        String[] t = {this.getString(R.string.CPU_IDLE_C0_PATH),
-                this.getString(R.string.CPU_IDLE_C1_PATH),
-                this.getString(R.string.CPU_IDLE_C2_PATH),
-                this.getString(R.string.CPU_IDLE_C3_PATH)};
+        String[] t = {
+                Library.CPU_IDLE_C0_PATH,
+                Library.CPU_IDLE_C1_PATH,
+                Library.CPU_IDLE_C2_PATH,
+                Library.CPU_IDLE_C3_PATH
+        };
 
         for (int i = 0; i < s.length; i++) {
             String ss;
             try {
-                ss = MyTools.readFile(this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu0" + t[i]);
+                ss = MyTools.readFile(Library.CPU_IDLE_TRUNK_PATH + "cpu0" + t[i]);
             } catch (Exception e) {
                 ss = "n/a";
             }
@@ -855,7 +861,7 @@ public class CpuControlFragment extends Fragment {
             }
         }
 
-        vdd_list = MyTools.catToList(this.getString(R.string.VDD_LEVELS));
+        vdd_list = MyTools.catToList(Library.VDD_LEVELS);
 
         if (!vdd_list.get(0).equals("ladyGaga") && vdd_list.size() <= volDisplay.size()) {
 
@@ -977,61 +983,61 @@ public class CpuControlFragment extends Fragment {
             };
 
             String[] destinations = new String[]{
-                    this.getString(R.string.GOV0),
-                    this.getString(R.string.GOV1),
-                    this.getString(R.string.GOV2),
-                    this.getString(R.string.GOV3),
+                    Library.GOV0,
+                    Library.GOV1,
+                    Library.GOV2,
+                    Library.GOV3,
 
-                    this.getString(R.string.MAX_FREQ0_PATH),
-                    this.getString(R.string.MAX_FREQ1_PATH),
-                    this.getString(R.string.MAX_FREQ2_PATH),
-                    this.getString(R.string.MAX_FREQ3_PATH),
+                    Library.MAX_FREQ0_PATH,
+                    Library.MAX_FREQ1_PATH,
+                    Library.MAX_FREQ2_PATH,
+                    Library.MAX_FREQ3_PATH,
 
-                    this.getString(R.string.MIN_FREQ0_PATH),
-                    this.getString(R.string.MIN_FREQ1_PATH),
-                    this.getString(R.string.MIN_FREQ2_PATH),
-                    this.getString(R.string.MIN_FREQ3_PATH),
+                    Library.MIN_FREQ0_PATH,
+                    Library.MIN_FREQ1_PATH,
+                    Library.MIN_FREQ2_PATH,
+                    Library.MIN_FREQ3_PATH,
 
-                    this.getString(R.string.MIN_CPUS_ONLINE_PATH),
-                    this.getString(R.string.MAX_CPUS_ONLINE_PATH),
-                    this.getString(R.string.BOOSTED_CPUS_PATH),
-                    this.getString(R.string.SUSPEND_FREQ_PATH),
+                    Library.MIN_CPUS_ONLINE_PATH,
+                    Library.MAX_CPUS_ONLINE_PATH,
+                    Library.BOOSTED_CPUS_PATH,
+                    Library.SUSPEND_FREQ_PATH,
 
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu0" +
-                            this.getString(R.string.CPU_IDLE_C0_PATH),
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu1" +
-                            this.getString(R.string.CPU_IDLE_C0_PATH),
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu2" +
-                            this.getString(R.string.CPU_IDLE_C0_PATH),
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu3" +
-                            this.getString(R.string.CPU_IDLE_C0_PATH),
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu0" +
+                            Library.CPU_IDLE_C0_PATH,
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu1" +
+                            Library.CPU_IDLE_C0_PATH,
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu2" +
+                            Library.CPU_IDLE_C0_PATH,
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu3" +
+                            Library.CPU_IDLE_C0_PATH,
 
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu0" +
-                            this.getString(R.string.CPU_IDLE_C1_PATH),
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu1" +
-                            this.getString(R.string.CPU_IDLE_C1_PATH),
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu2" +
-                            this.getString(R.string.CPU_IDLE_C1_PATH),
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu3" +
-                            this.getString(R.string.CPU_IDLE_C1_PATH),
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu0" +
+                            Library.CPU_IDLE_C1_PATH,
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu1" +
+                            Library.CPU_IDLE_C1_PATH,
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu2" +
+                            Library.CPU_IDLE_C1_PATH,
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu3" +
+                            Library.CPU_IDLE_C1_PATH,
 
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu0" +
-                            this.getString(R.string.CPU_IDLE_C2_PATH),
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu1" +
-                            this.getString(R.string.CPU_IDLE_C2_PATH),
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu2" +
-                            this.getString(R.string.CPU_IDLE_C2_PATH),
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu3" +
-                            this.getString(R.string.CPU_IDLE_C2_PATH),
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu0" +
+                            Library.CPU_IDLE_C2_PATH,
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu1" +
+                            Library.CPU_IDLE_C2_PATH,
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu2" +
+                            Library.CPU_IDLE_C2_PATH,
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu3" +
+                            Library.CPU_IDLE_C2_PATH,
 
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu0" +
-                            this.getString(R.string.CPU_IDLE_C3_PATH),
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu1" +
-                            this.getString(R.string.CPU_IDLE_C3_PATH),
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu2" +
-                            this.getString(R.string.CPU_IDLE_C3_PATH),
-                    this.getString(R.string.CPU_IDLE_TRUNK_PATH) + "cpu3" +
-                            this.getString(R.string.CPU_IDLE_C3_PATH),
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu0" +
+                            Library.CPU_IDLE_C3_PATH,
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu1" +
+                            Library.CPU_IDLE_C3_PATH,
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu2" +
+                            Library.CPU_IDLE_C3_PATH,
+                    Library.CPU_IDLE_TRUNK_PATH + "cpu3" +
+                            Library.CPU_IDLE_C3_PATH
             };
 
             String flags = ":delay45:";
@@ -1048,9 +1054,9 @@ public class CpuControlFragment extends Fragment {
                     if (freqDisplay.get(i).getVisibility() != View.GONE)
                         vals.add(freqDisplay.get(i).getText().toString() + " " + volDisplay.get(i).getText().toString());
                 }
-                MyTools.completeScriptWith(file, vals, new String[]{this.getString(R.string.VDD_LEVELS)});
+                MyTools.completeScriptWith(file, vals, new String[]{Library.VDD_LEVELS});
 
-                File gov = new File("/sys/devices/system/cpu/cpufreq/" + MyTools.readFile(getResources().getString(R.string.GOV0)));
+                File gov = new File("/sys/devices/system/cpu/cpufreq/" + MyTools.readFile(Library.GOV0));
                 if (gov.exists() && gov.isDirectory()) {
                     File[] files = gov.listFiles();
                     if (files != null) {

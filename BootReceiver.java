@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.themike10452.hellscorekernelmanager.Blackbox.Blackbox;
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 import java.io.File;
 
@@ -19,7 +20,7 @@ public class BootReceiver extends BroadcastReceiver {
         if (kernel.toLowerCase().contains("hells") || Blackbox.tool4(context))
             try {
                 Shell.SH.run(String.format("echo `date +%s` -- boot intent received >> %s", "+%T", "/sdcard/HKM.log"));
-                if (!(new File(context.getString(R.string.kgamma_blue)).exists())) {
+                if (!(new File(Library.kgamma_blue).exists())) {
                     Intent cm = new Intent(context, BackgroudService.class);
                     context.startService(cm);
                 }

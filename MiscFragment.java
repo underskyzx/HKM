@@ -18,6 +18,7 @@ import android.widget.Switch;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.MapBuilder;
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class MiscFragment extends Fragment {
 
         setOnBootFile = new File(scriptsDir + File.separator
                 + setOnBootFileName);
-        setOnBootAgent = new File(this.getString(R.string.setOnBootAgentFile));
+        setOnBootAgent = new File(Library.setOnBootAgentFile);
 
         setOnBoot = (CheckBox) view.findViewById(R.id.setOnBoot);
         spinner1 = (Spinner) view.findViewById(R.id.spinner1);
@@ -63,7 +64,7 @@ public class MiscFragment extends Fragment {
 
         StringBuffer tmp;
         try {
-            tmp = new StringBuffer(MyTools.readFile(this.getString(R.string.IO_SCHED_PATH)));
+            tmp = new StringBuffer(MyTools.readFile(Library.IO_SCHED_PATH));
         } catch (Exception e) {
             tmp = new StringBuffer("n/a");
         }
@@ -111,7 +112,7 @@ public class MiscFragment extends Fragment {
         view.clearFocus();
         String tmp0;
         try {
-            tmp0 = MyTools.readFile(this.getString(R.string.IO_SCHED_PATH));
+            tmp0 = MyTools.readFile(Library.IO_SCHED_PATH);
         } catch (Exception e) {
             tmp0 = "n/a";
         }
@@ -127,21 +128,21 @@ public class MiscFragment extends Fragment {
             spinner1.setVisibility(View.GONE);
         }
         try {
-            readAhead_field.setText(MyTools.readFile(this.getString(R.string.READ_AHEAD_BUFFER_PATH)));
+            readAhead_field.setText(MyTools.readFile(Library.READ_AHEAD_BUFFER_PATH));
         } catch (Exception e) {
             MyTools.longToast(getActivity(), "readAhead: " + e.toString());
             readAhead_field.setText("n/a");
         }
 
         try {
-            thrott_field.setText(MyTools.readFile(getString(R.string.MSM_THERMAL_PATH)));
+            thrott_field.setText(MyTools.readFile(Library.MSM_THERMAL_PATH));
         } catch (Exception e) {
             MyTools.longToast(getActivity(), "msm_thermal: " + e.toString());
             thrott_field.setText("n/a");
         }
 
         try {
-            if (MyTools.readFile(this.getString(R.string.DYN_FSYNC_PATH)).equals("1")) {
+            if (MyTools.readFile(Library.DYN_FSYNC_PATH).equals("1")) {
                 dynFsyncSwitch.setChecked(true);
             } else {
                 dynFsyncSwitch.setChecked(false);
@@ -152,7 +153,7 @@ public class MiscFragment extends Fragment {
         }
 
         try {
-            if (MyTools.readFile(this.getString(R.string.FASTCHARGE_PATH)).equals("1")) {
+            if (MyTools.readFile(Library.FASTCHARGE_PATH).equals("1")) {
                 fastChargeSwitch.setChecked(true);
             } else {
                 fastChargeSwitch.setChecked(false);
@@ -163,7 +164,7 @@ public class MiscFragment extends Fragment {
         }
 
         try {
-            vibrator_field.setText(MyTools.readFile(this.getString(R.string.VIBRATOR_AMP)));
+            vibrator_field.setText(MyTools.readFile(Library.VIBRATOR_AMP));
         } catch (Exception e) {
             vibrator_field.setText("n/a");
             MyTools.longToast(getActivity(), "Vib_Strength: " + e.toString());
@@ -191,18 +192,18 @@ public class MiscFragment extends Fragment {
                                     null)
                             .build()
             );
-            MyTools.write(AVAIL_SCHED[spinner1.getSelectedItemPosition()], this.getString(R.string.IO_SCHED_PATH));
-            MyTools.write(readAhead_field.getText().toString(), this.getString(R.string.READ_AHEAD_BUFFER_PATH));
+            MyTools.write(AVAIL_SCHED[spinner1.getSelectedItemPosition()], Library.IO_SCHED_PATH);
+            MyTools.write(readAhead_field.getText().toString(), Library.READ_AHEAD_BUFFER_PATH);
 
-            MyTools.write(MyTools.parseIntFromBoolean(dynFsyncSwitch.isChecked()), this.getString(R.string.DYN_FSYNC_PATH));
-            MyTools.write(MyTools.parseIntFromBoolean(fastChargeSwitch.isChecked()), this.getString(R.string.FASTCHARGE_PATH));
+            MyTools.write(MyTools.parseIntFromBoolean(dynFsyncSwitch.isChecked()), Library.DYN_FSYNC_PATH);
+            MyTools.write(MyTools.parseIntFromBoolean(fastChargeSwitch.isChecked()), Library.FASTCHARGE_PATH);
 
-            MyTools.write(thrott_field.getText().toString(), getString(R.string.MSM_THERMAL_PATH));
+            MyTools.write(thrott_field.getText().toString(), Library.MSM_THERMAL_PATH);
 
             if (Integer.parseInt(vibrator_field.getText().toString()) > 100)
                 vibrator_field.setText("100");
 
-            MyTools.write(vibrator_field.getText().toString(), this.getString(R.string.VIBRATOR_AMP));
+            MyTools.write(vibrator_field.getText().toString(), Library.VIBRATOR_AMP);
             MyTools.toast(getActivity(), R.string.toast_done_succ);
         } catch (Exception ignored) {
             MyTools.longToast(getActivity(), R.string.toast_failed);
@@ -229,12 +230,12 @@ public class MiscFragment extends Fragment {
             };
 
             String[] destinations = {
-                    this.getString(R.string.IO_SCHED_PATH),
-                    this.getString(R.string.READ_AHEAD_BUFFER_PATH),
-                    getString(R.string.MSM_THERMAL_PATH),
-                    this.getString(R.string.DYN_FSYNC_PATH),
-                    this.getString(R.string.FASTCHARGE_PATH),
-                    this.getString(R.string.VIBRATOR_AMP)
+                    Library.IO_SCHED_PATH,
+                    Library.READ_AHEAD_BUFFER_PATH,
+                    Library.MSM_THERMAL_PATH,
+                    Library.DYN_FSYNC_PATH,
+                    Library.FASTCHARGE_PATH,
+                    Library.VIBRATOR_AMP
             };
 
 

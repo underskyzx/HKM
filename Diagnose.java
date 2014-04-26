@@ -14,6 +14,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -91,7 +93,7 @@ public class Diagnose extends Activity {
                     new AsyncTask<Void, Void, Boolean>() {
                         @Override
                         protected Boolean doInBackground(Void... voids) {
-                            Shell.SU.run("chmod 775 " + getString(R.string.setOnBootAgentFile));
+                            Shell.SU.run("chmod 775 " + Library.setOnBootAgentFile);
                             Shell.SU.run("chmod 775 " + dataDir + File.separator + "scripts" + File.separator + "*");
                             return null;
                         }
@@ -114,7 +116,7 @@ public class Diagnose extends Activity {
                         @Override
                         protected Boolean doInBackground(Void... voids) {
                             try {
-                                MyTools.createBootAgent(activity, new File(activity.getString(R.string.setOnBootAgentFile)));
+                                MyTools.createBootAgent(activity, new File(Library.setOnBootAgentFile));
                             } catch (Exception e) {
                                 MyTools.longToast(activity, e.toString());
                                 return false;
@@ -170,7 +172,7 @@ public class Diagnose extends Activity {
             @Override
             protected void onPostExecute(Void vd) {
                 File report = new File(Environment.getExternalStorageDirectory() +
-                        File.separator + getString(R.string.report_file));
+                        File.separator + Library.report_file);
 
                 try {
                     report.delete();
@@ -205,8 +207,8 @@ public class Diagnose extends Activity {
                             new AlertDialog.Builder(thisActivity)
                                     .setMessage(getString(R.string.diagnosis_done)
                                             .replace("###", Environment.getExternalStorageDirectory() +
-                                                    File.separator + getString(R.string.report_file))
-                                            .replace("@@@", getString(R.string.my_email)))
+                                                    File.separator + Library.report_file)
+                                            .replace("@@@", Library.my_email))
                                     .show();
 
                     }
@@ -222,7 +224,7 @@ public class Diagnose extends Activity {
 
         File scriptsDir = new File(dataDir + File.separator + "scripts");
 
-        File bootAgent = new File(getString(R.string.setOnBootAgentFile));
+        File bootAgent = new File(Library.setOnBootAgentFile);
         setCheckbox(agentExists, agentCanExecute, bootAgent);
 
         File cpuBoot = new File(scriptsDir + File.separator + CpuControlFragment.setOnBootFileName);

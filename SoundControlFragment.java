@@ -17,6 +17,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.themike10452.hellscorekernelmanager.Blackbox.Blackbox;
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 import java.io.File;
 
@@ -54,7 +55,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
         view = inflater.inflate(R.layout.fragment_sound_control, container, false);
         setHasOptionsMenu(true);
 
-        String s = MyTools.readFile(getString(R.string.SOUND_CONTROL_VERSION_PATH));
+        String s = MyTools.readFile(Library.SOUND_CONTROL_VERSION_PATH);
         if (!s.equals("n/a")) {
             TextView tv = (TextView) view.findViewById(R.id.title);
             if (s.contains(":"))
@@ -94,7 +95,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
                 throw new Exception();
             linked = Boolean.parseBoolean(ss);
         } catch (Exception e) {
-            MainActivity.showDonationDialog(getActivity());
+            //MainActivity.showDonationDialog(getActivity());
             linked = true;
             MySQLiteAdapter.insertOrUpdate(
                     getActivity(),
@@ -150,7 +151,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
 
         String a, b, c, d, e;
         {
-            a = MyTools.readFile(getString(R.string.HP_GAIN_PATH));
+            a = MyTools.readFile(Library.HP_GAIN_PATH);
             try {
                 short a1 = Blackbox.tool3(Short.parseShort((a.split(" "))[0]), (byte) 1);
                 short a2 = Blackbox.tool3(Short.parseShort((a.split(" "))[1]), (byte) 1);
@@ -165,7 +166,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
             }
         }
         {
-            b = MyTools.readFile(getString(R.string.HP_PA_GAIN_PATH));
+            b = MyTools.readFile(Library.HP_PA_GAIN_PATH);
             try {
                 short b1 = Blackbox.tool3(Short.parseShort((b.split(" "))[0]), (byte) 2);
                 short b2 = Blackbox.tool3(Short.parseShort((b.split(" "))[1]), (byte) 2);
@@ -180,7 +181,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
             }
         }
         {
-            c = MyTools.readFile(getString(R.string.SPEAKER_GAIN_PATH));
+            c = MyTools.readFile(Library.SPEAKER_GAIN_PATH);
             try {
                 short c1 = Blackbox.tool3(Short.parseShort((c.split(" "))[0]), (byte) 1);
                 short c2 = Blackbox.tool3(Short.parseShort((c.split(" "))[1]), (byte) 1);
@@ -195,7 +196,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
             }
         }
         {
-            d = MyTools.readFile(getString(R.string.MIC_GAIN_PATH));
+            d = MyTools.readFile(Library.MIC_GAIN_PATH);
             try {
                 short d1 = Blackbox.tool3(Short.parseShort((d.split(" "))[0]), (byte) 1);
                 mic_gain_display.setText(Short.toString(d1));
@@ -206,7 +207,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
             }
         }
         {
-            e = MyTools.readFile(getString(R.string.CAMMIC_GAIN_PATH));
+            e = MyTools.readFile(Library.CAMMIC_GAIN_PATH);
             try {
                 short e1 = Blackbox.tool3(Short.parseShort((e.split(" "))[0]), (byte) 1);
                 camMic_gain_display.setText(Short.toString(e1));
@@ -251,13 +252,13 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
                 @Override
                 protected Boolean doInBackground(Void... voids) {
                     try {
-                        MyTools.SUhardWrite("0", getString(R.string.SOUND_LOCK_PATH));
-                        MyTools.SUhardWrite(rep1, getString(R.string.HP_GAIN_PATH));
-                        MyTools.SUhardWrite(rep2, getString(R.string.HP_PA_GAIN_PATH));
-                        MyTools.SUhardWrite(rep3, getString(R.string.SPEAKER_GAIN_PATH));
-                        MyTools.SUhardWrite(rep4, getString(R.string.MIC_GAIN_PATH));
-                        MyTools.SUhardWrite(rep5, getString(R.string.CAMMIC_GAIN_PATH));
-                        MyTools.SUhardWrite("1", getString(R.string.SOUND_LOCK_PATH));
+                        MyTools.SUhardWrite("0", Library.SOUND_LOCK_PATH);
+                        MyTools.SUhardWrite(rep1, Library.HP_GAIN_PATH);
+                        MyTools.SUhardWrite(rep2, Library.HP_PA_GAIN_PATH);
+                        MyTools.SUhardWrite(rep3, Library.SPEAKER_GAIN_PATH);
+                        MyTools.SUhardWrite(rep4, Library.MIC_GAIN_PATH);
+                        MyTools.SUhardWrite(rep5, Library.CAMMIC_GAIN_PATH);
+                        MyTools.SUhardWrite("1", Library.SOUND_LOCK_PATH);
 
                         //set on boot prep
 

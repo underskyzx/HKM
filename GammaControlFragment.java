@@ -107,7 +107,7 @@ public class GammaControlFragment extends Fragment {
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_gamma_control, container, false);
 
-        MODE = (new File(this.getString(R.string.kgamma_blue)).exists()) ? 1 : 2;
+        MODE = (new File(Library.kgamma_blue).exists()) ? 1 : 2;
 
         if (MODE != 1) {
             (view.findViewById(R.id.gamma)).setVisibility(View.GONE);
@@ -122,7 +122,7 @@ public class GammaControlFragment extends Fragment {
         scriptsDir = new File(dataDir + File.separator + "scripts");
         setOnBootFile = new File(scriptsDir + File.separator
                 + setOnBootFileName);
-        setOnBootAgent = new File(this.getString(R.string.setOnBootAgentFile));
+        setOnBootAgent = new File(Library.setOnBootAgentFile);
 
         refreshAll();
 
@@ -381,15 +381,15 @@ public class GammaControlFragment extends Fragment {
                 new String[]{DBHelper.SETTINGS_TABLE_KEY,
                         DBHelper.SETTINGS_TABLE_COLUMN1,
                         DBHelper.SETTINGS_TABLE_COLUMN2},
-                new String[]{this.getString(R.string.LOADED_COLOR_PROFILE),
+                new String[]{Library.TAG_LOADED_COLOR_PROFILE,
                         toLoad, "null"}
         );
 
         hideSoftKeyboard(getActivity());
         getValues();
-        MyTools.write(redCal, this.getString(R.string.kgamma_r));
-        MyTools.write(greenCal, this.getString(R.string.kgamma_g));
-        MyTools.write(blueCal, this.getString(R.string.kgamma_b));
+        MyTools.write(redCal, Library.kgamma_r);
+        MyTools.write(greenCal, Library.kgamma_g);
+        MyTools.write(blueCal, Library.kgamma_b);
 
         try {
             redTemp = redTempField.getText().toString().trim();
@@ -406,16 +406,11 @@ public class GammaControlFragment extends Fragment {
         }
 
         String comTemp = redTemp + " " + greenTemp + " " + blueTemp;
-        MyTools.write(comTemp, this.getString(R.string.kcal));
+        MyTools.write(comTemp, Library.kcal);
 
-        /*if ((new File(getString(R.string.REFRESH_SCREEN))).exists())
+        if ((new File(Library.kgamma_apply)).exists())
             MyTools.execTerminalCommand(new String[]{
-                    String.format("echo 1 > %s", getString(R.string.REFRESH_SCREEN))
-            });
-        */
-        if ((new File(getString(R.string.kgamma_apply))).exists())
-            MyTools.execTerminalCommand(new String[]{
-                    String.format("echo 1 > %s", getString(R.string.kgamma_apply))
+                    String.format("echo 1 > %s", Library.kgamma_apply)
             });
 
         showOutMsg(0);
@@ -454,7 +449,7 @@ public class GammaControlFragment extends Fragment {
         greenCalField = (EditText) view.findViewById(R.id.greenCalField);
         blueCalField = (EditText) view.findViewById(R.id.blueCalField);
 
-        String[] Temp = cat(this.getString(R.string.kcal)).split(" ");
+        String[] Temp = cat(Library.kcal).split(" ");
 
         if (!Temp[0].equals("n/a")) {
             redTempField.setText(Temp[0]);
@@ -463,9 +458,9 @@ public class GammaControlFragment extends Fragment {
         }
         switch (MODE) {
             case 1:
-                redCalField.setText(cat(this.getString(R.string.kgamma_red)));
-                greenCalField.setText(cat(this.getString(R.string.kgamma_green)));
-                blueCalField.setText(cat(this.getString(R.string.kgamma_blue)));
+                redCalField.setText(cat(Library.kgamma_red));
+                greenCalField.setText(cat(Library.kgamma_green));
+                blueCalField.setText(cat(Library.kgamma_blue));
                 break;
             case 2:
                 // redCalField.setText(cat(this.getString(R.string.kgamma_r)));
@@ -478,7 +473,7 @@ public class GammaControlFragment extends Fragment {
         try {
             loaded = (MySQLiteAdapter.select(getActivity(),
                     DBHelper.SETTINGS_TABLE, DBHelper.SETTINGS_TABLE_KEY,
-                    this.getString(R.string.LOADED_COLOR_PROFILE),
+                    Library.TAG_LOADED_COLOR_PROFILE,
                     new String[]{DBHelper.SETTINGS_TABLE_COLUMN1}))[0];
         } catch (IndexOutOfBoundsException e) {
             loaded = profiles.get(0);
@@ -555,10 +550,10 @@ public class GammaControlFragment extends Fragment {
                 };
 
                 String[] destinations = {
-                        this.getString(R.string.kgamma_r),
-                        this.getString(R.string.kgamma_g),
-                        this.getString(R.string.kgamma_b),
-                        this.getString(R.string.kcal)
+                        Library.kgamma_r,
+                        Library.kgamma_g,
+                        Library.kgamma_b,
+                        Library.kcal
                 };
 
                 MyTools.fillScript(setOnBootFile, values, destinations, "");

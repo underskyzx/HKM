@@ -31,6 +31,7 @@ public class MySQLiteAdapter {
 
     public static void createColorProfiles(Context context) {
         AssetManager manager = context.getAssets();
+        clearTable(context, DBHelper.COLOR_PROFILES_TABLE);
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(manager.open("color_profiles.dat")));
             String values = reader.readLine();

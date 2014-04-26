@@ -16,6 +16,8 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,7 +72,7 @@ public class GpuControlFragment extends Fragment {
         File dataDir = new File(MyTools.getDataDir(getActivity()));
         scriptsDir = new File(dataDir + File.separator + "scripts");
         setOnBootFile = new File(scriptsDir + File.separator + setOnBootFileName);
-        setOnBootAgent = new File(this.getString(R.string.setOnBootAgentFile));
+        setOnBootAgent = new File(Library.setOnBootAgentFile);
 
         setOnBoot = (CheckBox) rootView.findViewById(R.id.setOnBoot);
         spinner = (Spinner) rootView.findViewById(R.id.spinner1);
@@ -86,7 +88,7 @@ public class GpuControlFragment extends Fragment {
 
         governors = getResources().getStringArray(R.array.gpu_governors);
         try {
-            freq = MyTools.readFile(this.getString(R.string.GPU_AVAIL_FREQ_PATH)).split(" ");
+            freq = MyTools.readFile(Library.GPU_AVAIL_FREQ_PATH).split(" ");
         } catch (Exception e) {
             MyTools.longToast(getActivity(), "GPU_FREQ_TABLE: " + e.toString());
             freq = new String[]{"n/a"};
@@ -108,7 +110,7 @@ public class GpuControlFragment extends Fragment {
                                           boolean fromUser) {
                 String gpu_max_clk;
                 try {
-                    gpu_max_clk = MyTools.readFile(getActivity().getString(R.string.MAX_GPUCLK_PATH));
+                    gpu_max_clk = MyTools.readFile(Library.MAX_GPUCLK_PATH);
                 } catch (Exception e) {
                     MyTools.longToast(getActivity(), "gpu_max_clk" + e.toString());
                     gpu_max_clk = "n/a";
@@ -132,7 +134,7 @@ public class GpuControlFragment extends Fragment {
 
         int ind;
         try {
-            ind = gpuGovernors.indexOf(MyTools.readFile(this.getString(R.string.GPU_GOV_PATH)));
+            ind = gpuGovernors.indexOf(MyTools.readFile(Library.GPU_GOV_PATH));
         } catch (Exception e) {
             ind = -1;
         }
@@ -148,7 +150,7 @@ public class GpuControlFragment extends Fragment {
         seekBar.setMax(FREQ.size() - 1);
         String gpu_max_clk;
         try {
-            gpu_max_clk = MyTools.readFile(this.getString(R.string.MAX_GPUCLK_PATH));
+            gpu_max_clk = MyTools.readFile(Library.MAX_GPUCLK_PATH);
         } catch (Exception e) {
             MyTools.longToast(getActivity(), "gpu_max_clk: " + e.toString());
             gpu_max_clk = "n/a";
@@ -172,16 +174,16 @@ public class GpuControlFragment extends Fragment {
         int i = spinner.getSelectedItemPosition();
         switch (i) {
             case 0:
-                MyTools.write(governors[i], this.getString(R.string.GPU_POLICY_PATH));
+                MyTools.write(governors[i], Library.GPU_POLICY_PATH);
                 break;
             default:
-                MyTools.write("trustzone", this.getString(R.string.GPU_POLICY_PATH));
-                MyTools.write(governors[i], this.getString(R.string.GPU_GOV_PATH));
+                MyTools.write("trustzone", Library.GPU_POLICY_PATH);
+                MyTools.write(governors[i], Library.GPU_GOV_PATH);
                 break;
         }
         String mxc = scaleUp(maxClkDisplay.getText().toString());
         if (!mxc.equals("zoro"))
-            MyTools.write(mxc, this.getString(R.string.MAX_GPUCLK_PATH));
+            MyTools.write(mxc, Library.MAX_GPUCLK_PATH);
 
         MyTools.toast(getActivity(), R.string.toast_done_succ);
     }
@@ -224,8 +226,8 @@ public class GpuControlFragment extends Fragment {
                     };
 
                     destinations = new String[]{
-                            this.getString(R.string.GPU_POLICY_PATH),
-                            this.getString(R.string.MAX_GPUCLK_PATH)
+                            Library.GPU_POLICY_PATH,
+                            Library.MAX_GPUCLK_PATH
                     };
                     break;
                 default:
@@ -235,9 +237,9 @@ public class GpuControlFragment extends Fragment {
                             freq[freq.length - 1 - seekBar.getProgress()]
                     };
                     destinations = new String[]{
-                            this.getString(R.string.GPU_POLICY_PATH),
-                            this.getString(R.string.GPU_GOV_PATH),
-                            this.getString(R.string.MAX_GPUCLK_PATH)
+                            Library.GPU_POLICY_PATH,
+                            Library.GPU_GOV_PATH,
+                            Library.MAX_GPUCLK_PATH
                     };
             }
 

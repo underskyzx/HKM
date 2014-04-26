@@ -8,6 +8,8 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
+
 import java.util.List;
 
 /**
@@ -47,27 +49,27 @@ public class MonitoringActivity extends Activity {
         } catch (Exception ingnored) {
         }
         battery_info = new String[][]{
-                {getString(R.string.BATTERY_SYSFS) + "/temp", "n/a"},
-                {getString(R.string.BATTERY_SYSFS) + "/health", "n/a"}
+                {Library.BATTERY_SYSFS + "/temp", "n/a"},
+                {Library.BATTERY_SYSFS + "/health", "n/a"}
         };
         cpu_info = new String[][]{
                 {
-                        getString(R.string.CPU_SYSFS) + "/cpu%s/online", "n/a", "n/a", "n/a", "n/a"
+                        Library.CPU_SYSFS + "/cpu%s/online", "n/a", "n/a", "n/a", "n/a"
                 },
                 {
-                        getString(R.string.CPU_SYSFS) + "/cpu%s/cpufreq/scaling_max_freq", "-21", "-21", "-21", "-21"
+                        Library.CPU_SYSFS + "/cpu%s/cpufreq/scaling_max_freq", "-21", "-21", "-21", "-21"
                 },
                 {
-                        getString(R.string.CPU_SYSFS) + "/cpu%s/cpufreq/scaling_min_freq", "-21", "-21", "-21", "-21"
+                        Library.CPU_SYSFS + "/cpu%s/cpufreq/scaling_min_freq", "-21", "-21", "-21", "-21"
                 },
                 {
-                        getString(R.string.CPU_SYSFS) + "/cpu%s/cpufreq/scaling_cur_freq", "n/a", "n/a", "n/a", "n/a"
+                        Library.CPU_SYSFS + "/cpu%s/cpufreq/scaling_cur_freq", "n/a", "n/a", "n/a", "n/a"
                 },
                 {
-                        getString(R.string.CPU_TEMP_PATH), "n/a"
+                        Library.CPU_TEMP_PATH, "n/a"
                 }
         };
-        TIS = getString(R.string.CPU_SYSFS) + "/cpu0/cpufreq/statis/time_in_state";
+        TIS = Library.CPU_SYSFS + "/cpu0/cpufreq/statis/time_in_state";
     }
 
     @Override
@@ -88,7 +90,7 @@ public class MonitoringActivity extends Activity {
 
             @Override
             protected Void doInBackground(Void... voids) {
-                int x = MyTools.catInt(getString(R.string.MSM_THERMAL_PATH), -1);
+                int x = MyTools.catInt(Library.MSM_THERMAL_PATH, -1);
                 if (x != -1)
                     ((ProgressBar) findViewById(R.id.cpu_temp_progress)).setMax(x);
                 for (byte b = 1; b < cpu_info[0].length; b++) {

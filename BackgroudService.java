@@ -4,6 +4,8 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
+
 import java.io.File;
 
 public class BackgroudService extends Service {
@@ -19,7 +21,7 @@ public class BackgroudService extends Service {
         String loaded;
         try {
             loaded = (MySQLiteAdapter.select(getBaseContext(), DBHelper.SETTINGS_TABLE, DBHelper.SETTINGS_TABLE_KEY,
-                    this.getString(R.string.LOADED_COLOR_PROFILE), new String[]{DBHelper.SETTINGS_TABLE_COLUMN1}))[0];
+                    Library.TAG_LOADED_COLOR_PROFILE, new String[]{DBHelper.SETTINGS_TABLE_COLUMN1}))[0];
         } catch (Exception e) {
             loaded = "~CUSTOM~";
         }
@@ -34,10 +36,10 @@ public class BackgroudService extends Service {
                     new String[]{"red", "green", "blue", "cal"});
         }
 
-        kgamma_r = this.getString(R.string.kgamma_r);
-        kgamma_g = this.getString(R.string.kgamma_g);
-        kgamma_b = this.getString(R.string.kgamma_b);
-        kcal = this.getString(R.string.kcal);
+        kgamma_r = Library.kgamma_r;
+        kgamma_g = Library.kgamma_g;
+        kgamma_b = Library.kgamma_b;
+        kcal = Library.kcal;
     }
 
     public IBinder onBind(Intent arg0) {
@@ -69,9 +71,9 @@ public class BackgroudService extends Service {
                     MyTools.write(Values[1], kgamma_g);
                     MyTools.write(Values[2], kgamma_b);
                     MyTools.write(Values[3], kcal);
-                    if ((new File(getString(R.string.kgamma_apply))).exists())
+                    if ((new File(Library.kgamma_apply)).exists())
                         MyTools.execTerminalCommand(new String[]{
-                                String.format("echo 1 > %s", getString(R.string.kgamma_apply))
+                                String.format("echo 1 > %s", Library.kgamma_apply)
                         });
                     try {
                         long cycle = 15000;

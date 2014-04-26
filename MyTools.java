@@ -11,6 +11,8 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -279,7 +281,7 @@ public class MyTools {
                     filesDir.mkdir();
 
                 File setOnBootAgentTmpFile = new File(filesDir.toString() + File.separator + "tmpScript");
-                File setOnBootAgentFile = new File(context.getString(R.string.setOnBootAgentFile));
+                File setOnBootAgentFile = new File(Library.setOnBootAgentFile);
                 PrintWriter pw;
 
                 if (setOnBootAgentTmpFile.exists() && !setOnBootAgentTmpFile.isDirectory())
