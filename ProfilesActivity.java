@@ -200,7 +200,8 @@ public final class ProfilesActivity extends Activity {
                 nextMaxCores.getText().toString(),
                 nextMinCores.getText().toString(),
                 nextBoostCores.getText().toString(),
-                nextBoostFreq.getText().toString()
+                nextBoostFreq.getText().toString(),
+                nextMaxFreq.getText().toString()
         };
         final String[] dirs = new String[]{
                 Library.GOV0,
@@ -209,7 +210,8 @@ public final class ProfilesActivity extends Activity {
                 Library.MAX_CPUS_ONLINE_PATH,
                 Library.MIN_CPUS_ONLINE_PATH,
                 Library.BOOSTED_CPUS_PATH,
-                "/sys/devices/system/cpu/cpufreq/" + nextGov.getText().toString() + "/boostfreq"
+                "/sys/devices/system/cpu/cpufreq/" + nextGov.getText().toString() + "/boostfreq",
+                "/sys/devices/system/cpu/cpufreq/" + nextGov.getText().toString() + "/lmf_active_max_freq"
         };
         new AsyncTask<Void, Void, Void>() {
             private ProgressDialog dialog;

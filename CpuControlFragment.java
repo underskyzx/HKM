@@ -726,6 +726,8 @@ public class CpuControlFragment extends Fragment {
         for (String freq : freqArray1)
             MyTools.write(mxc, freq);
 
+        MyTools.write(mxc, "/sys/devices/system/cpu/cpufreq/" + gov + "/lmf_active_max_freq");
+
         String[] freqArray2 = {
                 Library.MIN_FREQ0_PATH,
                 Library.MIN_FREQ1_PATH,
@@ -950,6 +952,7 @@ public class CpuControlFragment extends Fragment {
                     AVAIL_FREQ[MAX_FREQ.getProgress()],
                     AVAIL_FREQ[MAX_FREQ.getProgress()],
                     AVAIL_FREQ[MAX_FREQ.getProgress()],
+                    AVAIL_FREQ[MAX_FREQ.getProgress()],
 
                     AVAIL_FREQ[MIN_FREQ.getProgress()],
                     AVAIL_FREQ[MIN_FREQ.getProgress()],
@@ -992,6 +995,7 @@ public class CpuControlFragment extends Fragment {
                     Library.MAX_FREQ1_PATH,
                     Library.MAX_FREQ2_PATH,
                     Library.MAX_FREQ3_PATH,
+                    "/sys/devices/system/cpu/cpufreq/" + cpuGovDisplay.getText().toString().trim() + "/lmf_active_max_freq",
 
                     Library.MIN_FREQ0_PATH,
                     Library.MIN_FREQ1_PATH,
