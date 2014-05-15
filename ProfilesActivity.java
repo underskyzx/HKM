@@ -20,7 +20,7 @@ import java.io.File;
  */
 public final class ProfilesActivity extends Activity {
 
-    private static String[] profileNames = {"PureBattery", "Battery", "Default", "Performance", "PurePerformance"};
+    private static String[] profileNames = {"PureBattery", "Battery", "Balanced", "Performance", "PurePerformance"};
     private final SeekBar.OnSeekBarChangeListener seekBarListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
