@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.themike10452.hellscorekernelmanager.Blackbox.Library;
@@ -26,6 +27,8 @@ public class TouchControlFragment extends Fragment {
     private File scriptsDir;
     private Switch dt2wSwitch, s2wSwitch;
     private CheckBox setOnBoot;
+    private TextView dt2wDesc, s2wDesc;
+    private String DT2W_PATH;
 
     public TouchControlFragment() {
 
@@ -64,6 +67,9 @@ public class TouchControlFragment extends Fragment {
         dt2wSwitch = (Switch) view.findViewById(R.id.dt2wSwitch);
         s2wSwitch = (Switch) view.findViewById(R.id.s2wSwitch);
 
+        dt2wDesc = (TextView) view.findViewById(R.id.dt2wDesc);
+        s2wDesc = (TextView) view.findViewById(R.id.s2wDesc);
+
         setOnBoot = (CheckBox) view.findViewById(R.id.setOnBoot);
 
         String dataDir = MyTools.getDataDir(getActivity());
@@ -71,13 +77,15 @@ public class TouchControlFragment extends Fragment {
         setOnBootFile = new File(scriptsDir + File.separator + setOnBootFileName);
         setOnBootAgent = new File(Library.setOnBootAgentFile);
 
+        DT2W_PATH = new File(Library.DT2W_PATH).exists() ? Library.DT2W_PATH : Library.DT2W_PATH_S;
+
         refreshAll();
 
         return view;
     }
 
     private void saveAll() {
-        MyTools.write(MyTools.parseIntFromBoolean(dt2wSwitch.isChecked()), Library.DT2W_PATH);
+        MyTools.write(MyTools.parseIntFromBoolean(dt2wSwitch.isChecked()), DT2W_PATH);
         MyTools.write(MyTools.parseIntFromBoolean(s2wSwitch.isChecked()), Library.S2W_PATH);
         showOutMsg(0);
     }
@@ -90,10 +98,18 @@ public class TouchControlFragment extends Fragment {
     }
 
     private void refreshAll() {
-        int tmpValue = MyTools.catInt(Library.DT2W_PATH, -1);
-        dt2wSwitch.setChecked(parseBooleanFromInt(tmpValue));
+        int tmpValue = MyTools.catInt(DT2W_PATH, -1);
+        if (tmpValue == -1) {
+            dt2wSwitch.setVisibility(View.GONE);
+            dt2wDesc.setVisibility(View.GONE);
+        } else
+            dt2wSwitch.setChecked(parseBooleanFromInt(tmpValue));
         tmpValue = MyTools.catInt(Library.S2W_PATH, -1);
-        s2wSwitch.setChecked(parseBooleanFromInt(tmpValue));
+        if (tmpValue == -1) {
+            s2wSwitch.setVisibility(View.GONE);
+            s2wDesc.setVisibility(View.GONE);
+        } else
+            s2wSwitch.setChecked(parseBooleanFromInt(tmpValue));
         setOnBoot.setChecked(
                 setOnBootFile.exists() && setOnBootAgent.exists() &&
                         !setOnBootFile.isDirectory() && !setOnBootAgent.isDirectory()
@@ -116,19 +132,19 @@ public class TouchControlFragment extends Fragment {
             String[] values;
             String[] destinations;
 
-            if (MyTools.catInt(Library.DT2W_PATH, -1) != -1) {
+            if (MyTools.catInt(DT2W_PATH, -1) != -1) {
                 if (MyTools.catInt(Library.S2W_PATH, -1) != -1) {
                     values = new String[2];
                     destinations = new String[2];
-                    values[0] = MyTools.readFile(Library.DT2W_PATH);
+                    values[0] = MyTools.readFile(DT2W_PATH);
                     values[1] = MyTools.readFile(Library.S2W_PATH);
-                    destinations[0] = Library.DT2W_PATH;
+                    destinations[0] = DT2W_PATH;
                     destinations[1] = Library.S2W_PATH;
                 } else {
                     values = new String[1];
                     destinations = new String[1];
-                    values[0] = MyTools.readFile(Library.DT2W_PATH);
-                    destinations[0] = Library.DT2W_PATH;
+                    values[0] = MyTools.readFile(DT2W_PATH);
+                    destinations[0] = DT2W_PATH;
                 }
             } else {
                 if (MyTools.catInt(Library.S2W_PATH, -1) != -1) {
