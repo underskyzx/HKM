@@ -9,6 +9,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.themike10452.hellscorekernelmanager.Blackbox.Library;
@@ -28,6 +29,16 @@ public class MyTools {
 
     private static Shell.Interactive rootSession;
     private static String dataDir;
+
+    public static void hideSoftKeyboard(Activity activity) {
+        try {
+            InputMethodManager inputMethodManager = (InputMethodManager) activity
+                    .getSystemService(Activity.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus()
+                    .getWindowToken(), 0);
+        } catch (Exception ignored) {
+        }
+    }
 
     public static void initiateSUShell(final Activity activity) {
 

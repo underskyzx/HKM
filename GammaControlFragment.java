@@ -1,6 +1,5 @@
 package com.themike10452.hellscorekernelmanager;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -13,7 +12,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -55,16 +53,6 @@ public class GammaControlFragment extends Fragment {
 
     public GammaControlFragment() {
 
-    }
-
-    private static void hideSoftKeyboard(Activity activity) {
-        try {
-            InputMethodManager inputMethodManager = (InputMethodManager) activity
-                    .getSystemService(Activity.INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus()
-                    .getWindowToken(), 0);
-        } catch (Exception ignored) {
-        }
     }
 
     @Override
@@ -385,7 +373,7 @@ public class GammaControlFragment extends Fragment {
                         toLoad, "null"}
         );
 
-        hideSoftKeyboard(getActivity());
+        MyTools.hideSoftKeyboard(getActivity());
         getValues();
         MyTools.write(redCal, Library.kgamma_r);
         MyTools.write(greenCal, Library.kgamma_g);
