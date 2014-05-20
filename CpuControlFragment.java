@@ -777,6 +777,8 @@ public class CpuControlFragment extends Fragment {
 
         for (int i = 0; i < volDisplay.size(); i++) {
             try {
+                if (freqDisplay.get(i).getVisibility() == View.GONE || Integer.parseInt(volDisplay.get(i).getText().toString()) > 1200000)
+                    continue;
                 String vdd = freqDisplay.get(i).getText().toString() + " "
                         + volDisplay.get(i).getText().toString();
                 MyTools.write(vdd, Library.VDD_LEVELS);
@@ -1055,8 +1057,11 @@ public class CpuControlFragment extends Fragment {
             if ((view.findViewById(R.id.voltages)).getVisibility() != View.GONE) {
                 ArrayList<String> vals = new ArrayList<String>();
                 for (int i = 0; i < freqDisplay.size(); i++) {
-                    if (freqDisplay.get(i).getVisibility() != View.GONE)
-                        vals.add(freqDisplay.get(i).getText().toString() + " " + volDisplay.get(i).getText().toString());
+                    try {
+                        if (freqDisplay.get(i).getVisibility() != View.GONE && Integer.parseInt(volDisplay.get(i).getText().toString()) <= 1200000)
+                            vals.add(freqDisplay.get(i).getText().toString() + " " + volDisplay.get(i).getText().toString());
+                    } catch (Exception ignored) {
+                    }
                 }
                 MyTools.completeScriptWith(file, vals, new String[]{Library.VDD_LEVELS});
 
