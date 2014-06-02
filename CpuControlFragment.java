@@ -2,8 +2,10 @@ package com.themike10452.hellscorekernelmanager;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -176,6 +178,22 @@ public class CpuControlFragment extends Fragment {
         }
     };
     TextView delay;
+    View.OnClickListener screenOffMaxButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            new AlertDialog.Builder(getActivity())
+                    .setTitle("Screen_Off Max")
+                    .setItems(AVAIL_FREQ,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    screenOffMaxDisplay.setText(scaleDown(AVAIL_FREQ[i]));
+                                }
+                            }
+                    )
+                    .show();
+        }
+    };
     private Boolean susfUnlocked;
     private final View.OnClickListener suspendFreqButtonListener = new View.OnClickListener() {
         @Override
@@ -193,7 +211,6 @@ public class CpuControlFragment extends Fragment {
                         ).show();
         }
     };
-
     private final View.OnLongClickListener suspendFreqButtonLCListener = new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View view) {
@@ -223,9 +240,8 @@ public class CpuControlFragment extends Fragment {
             return true;
         }
     };
-
     private Button saveProfile, reloadProfile, minCpusButton, maxCpusButton,
-            boostedCpusButton, suspendFreqButton, globalOffsetBtn;
+            boostedCpusButton, suspendFreqButton, screenOffMaxButton, globalOffsetBtn;
     private View view;
     private TextView susfLockState;
     private byte recurse = 0;
@@ -289,7 +305,7 @@ public class CpuControlFragment extends Fragment {
     private File setOnBootFile, setOnBootAgent, scriptsDir;
     private SeekBar MAX_FREQ, MIN_FREQ;
     private TextView maxfreqDisplay, minfreqDisplay, cpuGovDisplay, minCpusDisplay;
-    private TextView maxCpusDisplay, boostedCpusDisplay, suspendFreqDisplay;
+    private TextView maxCpusDisplay, boostedCpusDisplay, suspendFreqDisplay, screenOffMaxDisplay;
     private Switch cpuIdle_c0, cpuIdle_c1, cpuIdle_c2, cpuIdle_c3;
     private ArrayList<SeekBar> volSeekBars;
     private final View.OnClickListener globalOffsetBtnListener = new View.OnClickListener() {
@@ -384,7 +400,6 @@ public class CpuControlFragment extends Fragment {
         }
 
     };
-
 
     public CpuControlFragment() {
     }
@@ -565,10 +580,12 @@ public class CpuControlFragment extends Fragment {
         maxCpusDisplay = (TextView) view.findViewById(R.id.maxCpusDisplay);
         boostedCpusDisplay = (TextView) view.findViewById(R.id.boostedCpusDisplay);
         suspendFreqDisplay = (TextView) view.findViewById(R.id.suspendFreqDisplay);
+        screenOffMaxDisplay = (TextView) view.findViewById(R.id.screenOffMaxDisplay);
         minCpusButton = (Button) view.findViewById(R.id.minCpusButton);
         maxCpusButton = (Button) view.findViewById(R.id.maxCpusButton);
         boostedCpusButton = (Button) view.findViewById(R.id.boostedCpusButton);
         suspendFreqButton = (Button) view.findViewById(R.id.suspendFreqButton);
+        screenOffMaxButton = (Button) view.findViewById(R.id.screenOffMaxButton);
 
         // CPU IDLE
         cpuIdle_c0 = (Switch) view.findViewById(R.id.cpuIdle_c0);
@@ -676,6 +693,7 @@ public class CpuControlFragment extends Fragment {
         boostedCpusButton.setOnClickListener(boostedCpusButtonListener);
         suspendFreqButton.setOnClickListener(suspendFreqButtonListener);
         suspendFreqButton.setOnLongClickListener(suspendFreqButtonLCListener);
+        screenOffMaxButton.setOnClickListener(screenOffMaxButtonListener);
         globalOffsetBtn.setOnClickListener(globalOffsetBtnListener);
         cpuGovernorChangeButton.setOnClickListener(cpuGovernorButtonListener);
         MAX_FREQ.setOnSeekBarChangeListener(maxfreqListenner);
@@ -787,6 +805,15 @@ public class CpuControlFragment extends Fragment {
             }
         }
 
+        MyTools.write(MyTools.parseIntFromBoolean(((Switch) view.findViewById(R.id.screenOffMaxSwitch)).isChecked()), Library.SCREEN_OFF_MAX_STATE);
+        MyTools.write(scaleUp(screenOffMaxDisplay.getText().toString()), Library.SCREEN_OFF_MAX_FREQ);
+
+        SharedPreferences preferences = getActivity().getSharedPreferences("SharedPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        final char c = '|';
+        String customProfileData = cpuGovDisplay.getText().toString() + c + AVAIL_FREQ[MAX_FREQ.getProgress()] + c + AVAIL_FREQ[MIN_FREQ.getProgress()] + c + maxCpusDisplay.getText().toString() + c + minCpusDisplay.getText().toString() + c + boostedCpusDisplay.getText().toString() + c + MyTools.readFile("/sys/devices/system/cpu/cpufreq/" + cpuGovDisplay.getText().toString().trim() + "/boostfreq");
+        editor.putString("CustomProfileData", customProfileData).commit();
+
         MyTools.toast(getActivity(), R.string.toast_done_succ);
     }
 
@@ -841,6 +868,25 @@ public class CpuControlFragment extends Fragment {
             suspendFreqDisplay.setText(scaleDown(MyTools.readFile(Library.SUSPEND_FREQ_PATH)));
         } catch (Exception e) {
             suspendFreqDisplay.setText("n/a");
+        }
+
+        try {
+            String s = MyTools.readFile(Library.SCREEN_OFF_MAX_FREQ);
+            if (s.equals("n/a"))
+                throw new Exception();
+            screenOffMaxDisplay.setText(scaleDown(s));
+            s = MyTools.readFile(Library.SCREEN_OFF_MAX_STATE);
+            if (s.equals("n/a"))
+                throw new Exception();
+            ((Switch) view.findViewById(R.id.screenOffMaxSwitch))
+                    .setChecked(MyTools.parseBoolFromInteger(Integer.parseInt(s.trim())));
+        } catch (Exception e) {
+            view.findViewById(R.id.screenOffMaxDisplay).setVisibility(View.GONE);
+            view.findViewById(R.id.screenOffMaxButton).setVisibility(View.GONE);
+            view.findViewById(R.id.screenOffMaxSwitch).setVisibility(View.GONE);
+            view.findViewById(R.id.textView14).setVisibility(View.GONE);
+            view.findViewById(R.id.separator6).setVisibility(View.GONE);
+            view.findViewById(R.id.scoffAlias).setVisibility(View.GONE);
         }
 
         Switch[] s = {cpuIdle_c0, cpuIdle_c1, cpuIdle_c2, cpuIdle_c3};
@@ -944,6 +990,14 @@ public class CpuControlFragment extends Fragment {
             if (!susfUnlocked)
                 tmpSusf = null;
 
+            String tmpSoffMax1 = null;
+            String tmpSoffMax2 = null;
+
+            if (screenOffMaxDisplay.getVisibility() == View.VISIBLE) {
+                tmpSoffMax1 = MyTools.parseIntFromBoolean(((Switch) view.findViewById(R.id.screenOffMaxSwitch)).isChecked());
+                tmpSoffMax2 = scaleUp(screenOffMaxDisplay.getText().toString());
+            }
+
             String[] values = new String[]{
                     cpuGovDisplay.getText().toString(),
                     cpuGovDisplay.getText().toString(),
@@ -965,6 +1019,8 @@ public class CpuControlFragment extends Fragment {
                     maxCpusDisplay.getText().toString(),
                     boostedCpusDisplay.getText().toString(),
                     tmpSusf,
+                    tmpSoffMax1,
+                    tmpSoffMax2,
 
                     MyTools.parseIntFromBoolean(cpuIdle_c0.isChecked()),
                     MyTools.parseIntFromBoolean(cpuIdle_c0.isChecked()),
@@ -1008,6 +1064,8 @@ public class CpuControlFragment extends Fragment {
                     Library.MAX_CPUS_ONLINE_PATH,
                     Library.BOOSTED_CPUS_PATH,
                     Library.SUSPEND_FREQ_PATH,
+                    Library.SCREEN_OFF_MAX_STATE,
+                    Library.SCREEN_OFF_MAX_FREQ,
 
                     Library.CPU_IDLE_TRUNK_PATH + "cpu0" +
                             Library.CPU_IDLE_C0_PATH,
