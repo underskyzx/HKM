@@ -2,13 +2,18 @@ package com.themike10452.hellscorekernelmanager;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.themike10452.hellscorekernelmanager.Blackbox.Library;
@@ -34,6 +39,8 @@ public final class ProfilesActivity extends Activity {
                 nextMinCores.setText(tok[4]);
                 nextBoostCores.setText(tok[5]);
                 nextBoostFreq.setText(tok[6]);
+                if (!b)
+                    use_custom.setChecked(false);
             } catch (IndexOutOfBoundsException ignored) {
             }
         }
@@ -52,6 +59,8 @@ public final class ProfilesActivity extends Activity {
     private static TextView currentMaxFreq, nextMaxFreq, currentMinFreq, nextMinFreq,
             currentMaxCores, nextMaxCores, currentMinCores, nextMinCores, currentGov, nextGov,
             currentBoostCores, nextBoostCores, currentBoostFreq, nextBoostFreq;
+    private static Spinner sp1, sp2;
+    private static EditText LTE, GTE;
     private final CheckBox.OnCheckedChangeListener use_custom_listener = new CompoundButton.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -71,6 +80,7 @@ public final class ProfilesActivity extends Activity {
             seekBar.setEnabled(!b);
         }
     };
+    SharedPreferences preferences;
     private SeekBar seekBar;
     private CheckBox use_custom;
     private Activity thisActivity;
@@ -103,6 +113,20 @@ public final class ProfilesActivity extends Activity {
         use_custom.setOnCheckedChangeListener(use_custom_listener);
         seekBar = (SeekBar) findViewById(R.id.profileBar);
         seekBar.setOnSeekBarChangeListener(seekBarListener);
+        sp1 = (Spinner) findViewById(R.id.sp1);
+        sp2 = (Spinner) findViewById(R.id.sp2);
+        sp1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, MyTools.addToArray(profileNames, getString(R.string.custom), 0)));
+        sp2.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, MyTools.addToArray(profileNames, getString(R.string.custom), 0)));
+        findViewById(R.id.moreBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                findViewById(R.id.autoSwitch).setVisibility(View.VISIBLE);
+                findViewById(R.id.moreBtn).setVisibility(View.GONE);
+            }
+        });
+        LTE = (EditText) findViewById(R.id.battery_lt_p);
+        GTE = (EditText) findViewById(R.id.battery_gt_p);
+        preferences = getSharedPreferences("SharedPrefs", MODE_PRIVATE);
     }
 
     @Override
@@ -145,8 +169,7 @@ public final class ProfilesActivity extends Activity {
                 refresh();
                 return true;
             case R.id.action_apply:
-                if (!use_custom.isChecked())
-                    apply();
+                apply();
                 return true;
         }
         return false;
@@ -190,9 +213,14 @@ public final class ProfilesActivity extends Activity {
                 seekBar.setEnabled(false);
             }
         }
+        sp1.setSelection(preferences.getInt("batteryLT_profile_code", 0));
+        sp2.setSelection(preferences.getInt("batteryGT_profile_code", 0));
+        LTE.setText(preferences.getInt("batteryLT_edge", 50) + "");
+        GTE.setText(preferences.getInt("batteryGT_edge", 50) + "");
     }
 
     private void apply() {
+
         final String[] values = new String[]{
                 nextGov.getText().toString(),
                 nextMaxFreq.getText().toString(),
@@ -235,7 +263,14 @@ public final class ProfilesActivity extends Activity {
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                dialog.dismiss();
+                final SharedPreferences.Editor prefEditor = preferences.edit();
+                prefEditor.putInt("batteryLT_profile_code", sp1.getSelectedItemPosition());
+                prefEditor.putInt("batteryGT_profile_code", sp2.getSelectedItemPosition());
+                prefEditor.putString("batteryLT_profile_alias", MyTools.addToArray(profileNames, getString(R.string.custom), 0)[sp1.getSelectedItemPosition()]);
+                prefEditor.putString("batteryGT_profile_alias", MyTools.addToArray(profileNames, getString(R.string.custom), 0)[sp2.getSelectedItemPosition()]);
+                prefEditor.putInt("batteryLT_edge", Integer.parseInt(((EditText) findViewById(R.id.battery_lt_p)).getText().toString()));
+                prefEditor.putInt("batteryGT_edge", Integer.parseInt(((EditText) findViewById(R.id.battery_gt_p)).getText().toString()));
+
                 refresh();
                 File SOB1 = new File(MyTools.getDataDir(getApplicationContext()) + File.separator + "scripts" + File.separator + CpuControlFragment.setOnBootFileName);
                 File SOB2 = new File(MyTools.getDataDir(getApplicationContext()) + File.separator + "scripts" + File.separator + subActivity1.setOnBootFileName);
@@ -248,9 +283,22 @@ public final class ProfilesActivity extends Activity {
                     } catch (Exception ignored) {
                     }
                 }
+
+                if (sp1.getSelectedItemPosition() + sp2.getSelectedItemPosition() != 0) {
+                    prefEditor.putBoolean("EnableProfileAutoSwitch", true);
+                } else {
+                    prefEditor.putBoolean("EnableProfileAutoSwitch", false);
+                }
+                char c = '|';
+                String customProfileData = governor + c + maxFreq + c + minFreq + c + maxCores + c + minCores + c + cpuBoost + c + boostFreq;
+                prefEditor.putString("CustomProfileData", customProfileData);
+                prefEditor.commit();
+
+                refresh();
+
+                dialog.dismiss();
                 MyTools.toast(getApplicationContext(), R.string.toast_done_succ);
             }
         }.execute();
     }
-
 }

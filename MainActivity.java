@@ -212,6 +212,12 @@ public class MainActivity extends FragmentActivity implements TabListener {
                 drawerItems
         ));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+        try {
+            if (!BatteryProfilesService.isRunning)
+                startService(new Intent(this, BatteryProfilesService.class));
+        } catch (Exception e) {
+        }
+
     }
 
     @Override

@@ -28,7 +28,10 @@ public class BootReceiver extends BroadcastReceiver {
                 Intent intent = new Intent(context, OnBootService.class);
                 context.startService(intent);
                 Shell.SH.run(String.format("echo `date %s` -- boot service called >> %s", "+%T", "/sdcard/HKM.log"));
+                if (!BatteryProfilesService.isRunning)
+                    context.startService(new Intent(context, BatteryProfilesService.class));
             } catch (Exception e) {
+            } catch (Error err) {
             }
     }
 }
