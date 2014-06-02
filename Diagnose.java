@@ -63,7 +63,7 @@ public class Diagnose extends Activity {
         touchCanExecute = (CheckBox) findViewById(R.id.checkBox6b);
         govExists = (CheckBox) findViewById(R.id.checkBox7a);
         govCanExecute = (CheckBox) findViewById(R.id.checkBox7b);
-        bootLog = (TextView) findViewById(R.id.bootLog);
+        bootLog = (TextView) findViewById(R.id.idlStt);
         fix = (Button) findViewById(R.id.fixButton);
         recBoot = (Button) findViewById(R.id.recBoot);
 
@@ -202,7 +202,7 @@ public class Diagnose extends Activity {
                         }
                         p.flush();
                         p.close();
-                        ((TextView) findViewById(R.id.bootLog)).setText(s);
+                        ((TextView) findViewById(R.id.idlStt)).setText(s);
                         if (i == 1)
                             new AlertDialog.Builder(thisActivity)
                                     .setMessage(getString(R.string.diagnosis_done)
