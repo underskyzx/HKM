@@ -211,8 +211,10 @@ public class MyTools {
             p.println("fi");
         }
         p.println("echo `date +%T` -- " + file.getName() + " executed >> /sdcard/HKM.log");
-        for (int i = 0; i < values.length; i++)
-            p.println("echo " + values[i] + " > " + destinations[i]);
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] != null && destinations[i] != null)
+                p.println("echo " + values[i] + " > " + destinations[i]);
+        }
 
         if (flags.contains(":delay:")) {
             p.println("else");
@@ -352,6 +354,23 @@ public class MyTools {
             return "1";
         else
             return "0";
+    }
+
+    public static Boolean parseBoolFromInteger(int i) {
+        return (i != 0);
+    }
+
+    public static String[] addToArray(String[] array, String string, int index) {
+        String[] newArray = new String[array.length + 1];
+        for (int i = 0; i < newArray.length; i++) {
+            if (i < index)
+                newArray[i] = array[i];
+            else if (i == index)
+                newArray[i] = string;
+            else
+                newArray[i] = array[i - 1];
+        }
+        return newArray;
     }
 
     public static void toast(Context c, int id) {
