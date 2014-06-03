@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Handler;
@@ -18,9 +17,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class BatteryProfilesService extends Service {
-    static IntentFilter filter = null;
     static boolean isRunning;
-    static Timer timer;
+    static String CP = null;
+    Timer timer;
 
     public BatteryProfilesService() {
     }
@@ -39,6 +38,7 @@ public class BatteryProfilesService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        CP = "";
         isRunning = true;
         final SharedPreferences preferences = getSharedPreferences("SharedPrefs", Context.MODE_PRIVATE);
         (timer = new Timer()).scheduleAtFixedRate(new TimerTask() {
@@ -75,7 +75,6 @@ public class BatteryProfilesService extends Service {
         int lowerBorn = preferences.getInt("batteryLT_edge", -101);
         int upperBorn = preferences.getInt("batteryGT_edge", 101);
         String currentProfile = preferences.getString("battery_current_profile", "Custom");
-        MediaPlayer player = MediaPlayer.create(getApplicationContext(), R.raw.doink);
 
         String[] values;
 
@@ -86,10 +85,14 @@ public class BatteryProfilesService extends Service {
         } else {
             toApply = "Custom";
             String[] toks = preferences.getString("CustomProfileData", "empty").split("\\|");
-            values = new String[]{toks[0], toks[1], toks[2], toks[3], toks[4], toks[5], toks[6]};
+            try {
+                values = new String[]{toks[0], toks[1], toks[2], toks[3], toks[4], toks[5], toks[6]};
+            } catch (ArrayIndexOutOfBoundsException e) {
+                return;
+            }
         }
 
-        if (!toApply.equals(currentProfile)) {
+        if (!toApply.equals(CP)) {
             if (values != null) {
                 values = MyTools.addToArray(values, values[1], values.length);
             } else {
@@ -121,18 +124,21 @@ public class BatteryProfilesService extends Service {
                 }
             }.execute();
 
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putString("battery_current_profile", toApply);
-            editor.commit();
-            player.start();
-            final String str = toApply;
-            Handler handler = new Handler(getMainLooper());
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getApplicationContext(), str + " Loaded", Toast.LENGTH_SHORT).show();
-                }
-            });
+            CP = toApply;
+
+            if (!toApply.equals(currentProfile)) {
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("battery_current_profile", toApply);
+                editor.commit();
+                final String str = toApply;
+                Handler handler = new Handler(getMainLooper());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), str + " Loaded", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         }
     }
 
@@ -150,7 +156,7 @@ public class BatteryProfilesService extends Service {
             return;
         }
 
-        if (!toApply.equals(currentProfile)) {
+        if (!toApply.equals(CP)) {
 
             final String[] finalValues = values;
 
@@ -175,17 +181,18 @@ public class BatteryProfilesService extends Service {
                 }
             }.execute();
 
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putString("battery_current_profile", toApply);
-            editor.commit();
-            final String str = toApply;
-            Handler handler = new Handler(getMainLooper());
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getApplicationContext(), str + " Loaded", Toast.LENGTH_SHORT).show();
-                }
-            });
+            preferences.edit().putString("battery_current_profile", toApply).commit();
+            CP = toApply;
+            if (!toApply.equals(currentProfile)) {
+                final String str = toApply;
+                Handler handler = new Handler(getMainLooper());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), str + " Loaded", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         }
     }
 }
