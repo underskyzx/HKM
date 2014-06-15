@@ -166,7 +166,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
         if (strings[0].equals("mode1"))
             try {
 
-                if (!force && !MyTools.readFile("/proc/version").toLowerCase().contains("hellsgod") && !Blackbox.tool4(activity))
+                if (!force && !MyTools.readFile("/proc/version").toLowerCase().contains("hellssgod") && !Blackbox.tool4(activity))
                     return false;
 
                 URL url = new URL(Library.kernel_list_url.trim());
@@ -213,7 +213,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
         else if (strings[0].equals("mode2"))
             try {
 
-                if (!force && !MyTools.readFile("/proc/version").toLowerCase().contains("hellsgod") && !Blackbox.tool4(activity))
+                if (!force && !MyTools.readFile("/proc/version").toLowerCase().contains("hellssgod") && !Blackbox.tool4(activity))
                     return false;
 
                 (dialog.findViewById(R.id.abortButton)).setOnClickListener(new View.OnClickListener() {
@@ -264,10 +264,8 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                 return true;
 
             } catch (MalformedURLException e) {
-                e.printStackTrace();
                 return false;
             } catch (IOException e) {
-                e.printStackTrace();
                 return false;
             }
         else
@@ -276,8 +274,48 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
 
     @Override
     public void onPostExecute(Boolean successful) {
-        if (mode.equals("mode1") && progressDialog != null) progressDialog.dismiss();
         if (successful) {
+            postUpdateList(successful);
+        } else {
+            try {
+                progressDialog.dismiss();
+                new AlertDialog.Builder(activity)
+                        .setCancelable(true)
+                        .setMessage("HellsCore kernel only")
+                        .setPositiveButton(R.string.button_getHellscore, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                InfoTabFragment.downloadFile(activity, true, "mode1");
+                            }
+                        })
+                        .setNeutralButton(R.string.button_dismiss, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                            }
+                        })
+                        .show();
+            } catch (NullPointerException ignored) {
+            }
+        }
+    }
+
+    @Override
+    protected void onProgressUpdate(Integer... args) {
+        ((ProgressBar) dialog.findViewById(R.id.progressBar))
+                .setIndeterminate(false);
+        ((TextView) dialog.findViewById(R.id.progressView))
+                .setText(args[0] + "/" + args[1]);
+        ((ProgressBar) dialog.findViewById(R.id.progressBar))
+                .setMax(args[1]);
+        ((ProgressBar) dialog.findViewById(R.id.progressBar))
+                .setProgress(args[0]);
+        //dialog.setCancelable(true);
+        ((TextView) dialog.findViewById(R.id.filename)).setText(filename);
+    }
+
+    private void postUpdateList(boolean b) {
+        if (mode.equals("mode1") && progressDialog != null) progressDialog.dismiss();
+        if (b) {
             if (mode.equals("mode1"))
                 InfoTabFragment.postUpdates(activity);
             else if (mode.equals("mode2")) {
@@ -296,19 +334,5 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
                             }
                         }).show();
         }
-    }
-
-    @Override
-    protected void onProgressUpdate(Integer... args) {
-        ((ProgressBar) dialog.findViewById(R.id.progressBar))
-                .setIndeterminate(false);
-        ((TextView) dialog.findViewById(R.id.progressView))
-                .setText(args[0] + "/" + args[1]);
-        ((ProgressBar) dialog.findViewById(R.id.progressBar))
-                .setMax(args[1]);
-        ((ProgressBar) dialog.findViewById(R.id.progressBar))
-                .setProgress(args[0]);
-        //dialog.setCancelable(true);
-        ((TextView) dialog.findViewById(R.id.filename)).setText(filename);
     }
 }

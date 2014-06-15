@@ -58,7 +58,7 @@ public class InfoTabFragment extends Fragment {
 
             final ArrayList<String> list = new ArrayList<String>();
             final ArrayList<String> links = new ArrayList<String>();
-            if (TestNames.get(0).toLowerCase().contains("#")) {
+            if (TestNames.size() > 0 && TestNames.get(0).toLowerCase().contains("#")) {
                 list.addAll(TestNames);
                 list.addAll(StableNames);
                 links.addAll(TestLinks);
@@ -168,6 +168,7 @@ public class InfoTabFragment extends Fragment {
         browser.setVisibility(View.GONE);
         WebSettings webSettings = browser.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        webSettings.setSupportZoom(true);
         Button stable = (Button) view.findViewById(R.id.stable);
         Button test = (Button) view.findViewById(R.id.test);
         Button check = (Button) view.findViewById(R.id.check);
