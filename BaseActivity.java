@@ -1,7 +1,11 @@
 package com.themike10452.hellscorekernelmanager;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -31,12 +35,35 @@ public class BaseActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
-
-
         String kernel = MyTools.readFile("/proc/version");
         if (kernel.toLowerCase().contains("hells") || Blackbox.tool4(getApplicationContext())) {
-            Intent i = new Intent(this, MainActivity.class);
-            new ProgressTask(this, i).execute();
+            final SharedPreferences preferences = getSharedPreferences("SharedPrefs", MODE_PRIVATE);
+            boolean b = preferences.getBoolean("ShowRatingDisclaimer", true);
+            if (b) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setPositiveButton("Take me to PlayStore", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse("market://details?id=com.themike10452.hellscorekernelmanager"));
+                        startActivity(intent);
+                        preferences.edit().putBoolean("ShowRatingDisclaimer", false).commit();
+                    }
+                })
+                        .setNeutralButton("My rating is fine", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                preferences.edit().putBoolean("ShowRatingDisclaimer", false).commit();
+                                load();
+                            }
+                        })
+                        .setCancelable(false)
+                        .setTitle("PlayStore Ratings")
+                        .setMessage("This is a direct message to all who gave a bad app rating long ago and forgot to update their ratings after updating and improving the app. Please go ahead and fix your ratings.\n\nThe same goes to all of you who gave bad ratings simply because you miss one small feature, this is a discouragement and unappreciation to my work and efforts to provide you this free app, so go ahead and rethink your ratings.\n\nThe App will be pulled from PS and back to XDA because of these unjustified bad ratings.\n\nNote: I am not the kernel developer, I just created the support app.")
+                        .show();
+            } else {
+                load();
+            }
         } else {
             findViewById(R.id.progressBar).setVisibility(TextView.GONE);
             findViewById(R.id.button).setVisibility(View.VISIBLE);
@@ -61,6 +88,11 @@ public class BaseActivity extends Activity {
             });
         }
 
+    }
+
+    private void load() {
+        Intent i = new Intent(this, MainActivity.class);
+        new ProgressTask(this, i).execute();
     }
 
 }
