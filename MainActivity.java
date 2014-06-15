@@ -25,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -78,7 +77,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
         dialog.setTitle(activity.getString(R.string.title_donation));
         dialog.setContentView(R.layout.halp);
         dialog.setCancelable(true);
-        ((Button) dialog.findViewById(R.id.button_donate)).setOnClickListener(new View.OnClickListener() {
+        dialog.findViewById(R.id.button_donate).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Library.donation_link)));
@@ -212,8 +211,9 @@ public class MainActivity extends FragmentActivity implements TabListener {
                 drawerItems
         ));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+        mDrawerList.setItemChecked(0, true);
         try {
-            if (!BatteryProfilesService.isRunning)
+            if (!BatteryProfilesService.isRunning && getSharedPreferences("SharedPrefs", MODE_PRIVATE).getBoolean("Enable_Profiles_Service", false))
                 startService(new Intent(this, BatteryProfilesService.class));
         } catch (Exception e) {
         }
@@ -313,9 +313,11 @@ public class MainActivity extends FragmentActivity implements TabListener {
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             int delay = 300;
             if (i < 7) {
+                mDrawerList.setSelection(i);
                 mDrawerLayout.closeDrawer(mDrawerList);
                 viewPager.setCurrentItem(i, false);
             } else {
+                mDrawerList.setItemChecked(viewPager.getCurrentItem(), true);
                 mDrawerLayout.closeDrawer(mDrawerList);
                 switch (i) {
                     case 7:
