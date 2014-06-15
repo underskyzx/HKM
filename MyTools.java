@@ -4,10 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -175,16 +173,6 @@ public class MyTools {
             }
         } else {
             return dataDir;
-        }
-    }
-
-    public static String getApplicationLabel(Activity activity, String info) {
-        PackageManager pm = activity.getPackageManager();
-        try {
-            ApplicationInfo ai = pm.getApplicationInfo(info, 0);
-            return ai.publicSourceDir;
-        } catch (Exception e) {
-            return "ladyGaga";
         }
     }
 
@@ -400,18 +388,6 @@ public class MyTools {
         MyTools.execTerminalCommand(new String[]{"chmod 775 " + innerLog.toString()});
         longToast(activity, log);
         write(log, file);
-    }
-
-    public static String readFirstLine(String file) throws Exception {
-        BufferedReader bufferedReader;
-        bufferedReader = new BufferedReader(new FileReader(new File(file)));
-        return bufferedReader.readLine();
-    }
-
-    public static void playSound(Activity activity) {
-        MediaPlayer mp = MediaPlayer.create(activity, R.raw.doink);
-        mp.setLooping(false);
-        mp.start();
     }
 
     private static String readDump(String fp) {
