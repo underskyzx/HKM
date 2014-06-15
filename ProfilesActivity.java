@@ -2,6 +2,7 @@ package com.themike10452.hellscorekernelmanager;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -39,8 +40,6 @@ public final class ProfilesActivity extends Activity {
                 nextMinCores.setText(tok[4]);
                 nextBoostCores.setText(tok[5]);
                 nextBoostFreq.setText(tok[6]);
-                if (!b)
-                    use_custom.setChecked(false);
             } catch (IndexOutOfBoundsException ignored) {
             }
         }
@@ -186,7 +185,7 @@ public final class ProfilesActivity extends Activity {
         currentBoostFreq.setText(boostFreq);
         String currentSettings = governor + "." + maxFreq + "." + minFreq + "." + maxCores + "." + minCores + "." + cpuBoost + "." + boostFreq;
         int ind = 0;
-        String[] ops = Library.getCpuProfiles(getApplicationContext());
+        String[] ops = Library.getCpuProfiles();
         try {
             for (String preset : ops) {
                 String s = preset.split("-")[1];
@@ -209,8 +208,8 @@ public final class ProfilesActivity extends Activity {
         } finally {
             if (ind >= ops.length) {
                 ((TextView) findViewById(R.id.profileDisplay)).setText(getString(R.string.custom));
-                use_custom.setChecked(true);
                 seekBar.setEnabled(false);
+                use_custom.setChecked(true);
             }
         }
         sp1.setSelection(preferences.getInt("batteryLT_profile_code", 0));
@@ -241,6 +240,23 @@ public final class ProfilesActivity extends Activity {
                 "/sys/devices/system/cpu/cpufreq/" + nextGov.getText().toString() + "/boostfreq",
                 "/sys/devices/system/cpu/cpufreq/" + nextGov.getText().toString() + "/lmf_active_max_freq"
         };
+
+        final SharedPreferences.Editor prefEditor = preferences.edit();
+
+        if (sp1.getSelectedItemPosition() + sp2.getSelectedItemPosition() != 0) {
+            if (!BatteryProfilesService.isRunning)
+                startService(new Intent(thisActivity, BatteryProfilesService.class));
+            prefEditor.putBoolean("EnableProfileAutoSwitch", true);
+        } else if (BatteryProfilesService.isRunning) {
+            try {
+                stopService(new Intent(thisActivity, BatteryProfilesService.class));
+            } catch (Exception e) {
+            } catch (Error er) {
+            } finally {
+                prefEditor.putBoolean("EnableProfileAutoSwitch", false);
+            }
+        }
+
         new AsyncTask<Void, Void, Void>() {
             private ProgressDialog dialog;
 
@@ -263,7 +279,6 @@ public final class ProfilesActivity extends Activity {
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                final SharedPreferences.Editor prefEditor = preferences.edit();
                 prefEditor.putInt("batteryLT_profile_code", sp1.getSelectedItemPosition());
                 prefEditor.putInt("batteryGT_profile_code", sp2.getSelectedItemPosition());
                 prefEditor.putString("batteryLT_profile_alias", MyTools.addToArray(profileNames, getString(R.string.custom), 0)[sp1.getSelectedItemPosition()]);
@@ -284,16 +299,11 @@ public final class ProfilesActivity extends Activity {
                     }
                 }
 
-                if (sp1.getSelectedItemPosition() + sp2.getSelectedItemPosition() != 0) {
-                    prefEditor.putBoolean("EnableProfileAutoSwitch", true);
-                } else {
-                    prefEditor.putBoolean("EnableProfileAutoSwitch", false);
-                }
                 char c = '|';
                 String customProfileData = governor + c + maxFreq + c + minFreq + c + maxCores + c + minCores + c + cpuBoost + c + boostFreq;
                 prefEditor.putString("CustomProfileData", customProfileData);
-                prefEditor.commit();
 
+                prefEditor.commit();
                 refresh();
 
                 dialog.dismiss();
