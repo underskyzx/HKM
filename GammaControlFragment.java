@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 public class GammaControlFragment extends Fragment {
 
     public static final String setOnBootFileName = "90hellscore_color_settings";
+    private static boolean expBrVerified;
     private final ArrayList<String> toRemove = new ArrayList<String>();
     private String redCal;
     private String greenCal;
@@ -44,11 +47,10 @@ public class GammaControlFragment extends Fragment {
     private EditText redCalField;
     private EditText greenCalField;
     private EditText blueCalField;
-    private CheckBox setOnBoot;
+    private CheckBox setOnBoot, expBr;
     private File setOnBootAgent, setOnBootFile, scriptsDir;
     private ArrayList<String> profiles;
     private String toLoad = "~CUSTOM~";
-
     private View view;
 
     public GammaControlFragment() {
@@ -106,11 +108,98 @@ public class GammaControlFragment extends Fragment {
         profiles = Library.getColorProfiles(getActivity());
         showOutMsg(-1);
 
-        String dataDir = MyTools.getDataDir(getActivity());
+        final String dataDir = MyTools.getDataDir(getActivity());
         scriptsDir = new File(dataDir + File.separator + "scripts");
         setOnBootFile = new File(scriptsDir + File.separator
                 + setOnBootFileName);
         setOnBootAgent = new File(Library.setOnBootAgentFile);
+
+        profiles = Library.getColorProfiles(getActivity());
+
+        setOnBoot = (CheckBox) view.findViewById(R.id.setOnBoot);
+
+        redTempField = (EditText) view.findViewById(R.id.redTempField);
+        greenTempField = (EditText) view.findViewById(R.id.greenTempField);
+        blueTempField = (EditText) view.findViewById(R.id.blueTempField);
+
+        redCalField = (EditText) view.findViewById(R.id.redCalField);
+        greenCalField = (EditText) view.findViewById(R.id.greenCalField);
+        blueCalField = (EditText) view.findViewById(R.id.blueCalField);
+
+        expBr = (CheckBox) view.findViewById(R.id.expBr);
+
+        expBr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, final boolean checked) {
+                String s = MyTools.parseIntFromBoolean(!checked);
+                MyTools.write(s, Library.BRIGHTNESS_MODE_PATH);
+                //TODO
+                if (checked) {
+                    expBrVerified = false;
+                    final Dialog dialog = new Dialog(getActivity());
+                    dialog.setContentView(R.layout.dialog_brightness_mode);
+                    dialog.setTitle(getString(R.string.title_confirmation));
+                    dialog.setCanceledOnTouchOutside(true);
+                    dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialogInterface) {
+                            expBrVerified = false;
+                            MyTools.write(MyTools.parseIntFromBoolean(checked), Library.BRIGHTNESS_MODE_PATH);
+                            expBr.setChecked(false);
+                        }
+                    });
+                    dialog.show();
+
+                    dialog.findViewById(R.id.positive_button).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            expBrVerified = true;
+                            dialog.dismiss();
+                        }
+                    });
+
+                    dialog.findViewById(R.id.negative_button).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.cancel();
+                        }
+                    });
+
+                    new AsyncTask<Void, Integer, Void>() {
+                        TextView view1 = (TextView) dialog.findViewById(R.id.message);
+
+                        @Override
+                        protected Void doInBackground(Void... voids) {
+                            int i = 9;
+                            try {
+                                while (dialog.isShowing() && !expBrVerified && i > 0) {
+                                    publishProgress(i--);
+                                    Thread.sleep(1000);
+                                }
+
+                            } catch (Exception ignored) {
+                                view1.setVisibility(View.GONE);
+                            }
+                            return null;
+                        }
+
+                        @Override
+                        protected void onProgressUpdate(Integer... values) {
+                            super.onProgressUpdate(values);
+                            view1.setText(String.format("Reverting to previous settings in %s seconds", values[0]));
+                        }
+
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            super.onPostExecute(aVoid);
+                            if (!expBrVerified)
+                                dialog.cancel();
+                        }
+                    }.execute();
+
+                }
+            }
+        });
 
         refreshAll();
 
@@ -425,18 +514,6 @@ public class GammaControlFragment extends Fragment {
 
     private void refreshAll() {
 
-        profiles = Library.getColorProfiles(getActivity());
-
-        setOnBoot = (CheckBox) view.findViewById(R.id.setOnBoot);
-
-        redTempField = (EditText) view.findViewById(R.id.redTempField);
-        greenTempField = (EditText) view.findViewById(R.id.greenTempField);
-        blueTempField = (EditText) view.findViewById(R.id.blueTempField);
-
-        redCalField = (EditText) view.findViewById(R.id.redCalField);
-        greenCalField = (EditText) view.findViewById(R.id.greenCalField);
-        blueCalField = (EditText) view.findViewById(R.id.blueCalField);
-
         String[] Temp = cat(Library.kcal).split(" ");
 
         if (!Temp[0].equals("n/a")) {
@@ -505,6 +582,17 @@ public class GammaControlFragment extends Fragment {
                 setOnBootFile.exists() && setOnBootAgent.exists() &&
                         !setOnBootFile.isDirectory() && !setOnBootAgent.isDirectory()
         );
+
+        try {
+            expBr.setChecked(!MyTools.parseBoolFromString(MyTools.readFile(Library.BRIGHTNESS_MODE_PATH).trim()));
+        } catch (Exception e) {
+            try {
+                expBr.setVisibility(View.GONE);
+                expBr = null;
+            } catch (Exception ignored) {
+            }
+        }
+
     }
 
     private void getValues() {

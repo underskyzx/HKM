@@ -69,6 +69,10 @@ public class GpuControlFragment extends Fragment {
                 container, false);
         setHasOptionsMenu(true);
 
+        //TODO mode 2
+        if (new File("/sys/kernel/msm_mpdecision").exists())
+            Library.gpu_governors = Library.gpu_governors_new;
+
         File dataDir = new File(MyTools.getDataDir(getActivity()));
         scriptsDir = new File(dataDir + File.separator + "scripts");
         setOnBootFile = new File(scriptsDir + File.separator + setOnBootFileName);
@@ -79,14 +83,12 @@ public class GpuControlFragment extends Fragment {
         seekBar = (SeekBar) rootView.findViewById(R.id.seekBar);
         maxClkDisplay = (TextView) rootView.findViewById(R.id.maxClkDisplay);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.gpu_governors,
-                android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(getActivity(), android.R.layout.simple_spinner_item, Library.gpu_governors);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
-        governors = getResources().getStringArray(R.array.gpu_governors);
+        governors = Library.gpu_governors;
         try {
             freq = MyTools.readFile(Library.GPU_AVAIL_FREQ_PATH).split(" ");
         } catch (Exception e) {
@@ -174,7 +176,7 @@ public class GpuControlFragment extends Fragment {
         int i = spinner.getSelectedItemPosition();
         switch (i) {
             case 0:
-                MyTools.write(governors[i], Library.GPU_POLICY_PATH);
+                MyTools.write(governors[i], Library.gpu_governors != Library.gpu_governors_new ? Library.GPU_POLICY_PATH : Library.GPU_GOV_PATH);
                 break;
             default:
                 MyTools.write("trustzone", Library.GPU_POLICY_PATH);

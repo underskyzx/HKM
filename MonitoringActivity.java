@@ -95,7 +95,7 @@ public class MonitoringActivity extends Activity {
                     ((ProgressBar) findViewById(R.id.cpu_temp_progress)).setMax(x);
                 for (byte b = 1; b < cpu_info[0].length; b++) {
                     MyTools.SUhardWrite("1", String.format(cpu_info[0][0], b - 1));
-                    cpu_info[0][b] = MyTools.readFile(String.format(cpu_info[0][0], b - 1));
+                    cpu_info[0][b] = MyTools.readFile(String.format(cpu_info[0][0], b - 1), "n/a");
                     for (byte b2 = 1; b2 < cpu_info[1].length; b2++) {
                         cpu_info[1][b2] = MyTools.catInt(String.format(cpu_info[1][0], b2 - 1), -21) + "";
                         cpu_info[2][b2] = MyTools.catInt(String.format(cpu_info[2][0], b2 - 1), -21) + "";
@@ -107,9 +107,9 @@ public class MonitoringActivity extends Activity {
                         Thread.sleep(1000);
                     } catch (InterruptedException ignored) {
                     }
-                    battery_info[0][1] = MyTools.readFile(battery_info[0][0]);
-                    battery_info[1][1] = MyTools.readFile(battery_info[1][0]);
-                    cpu_info[4][1] = MyTools.readFile(cpu_info[4][0]);
+                    battery_info[0][1] = MyTools.readFile(battery_info[0][0], "n/a");
+                    battery_info[1][1] = MyTools.readFile(battery_info[1][0], "n/a");
+                    cpu_info[4][1] = MyTools.readFile(cpu_info[4][0], "n/a");
                     for (byte b1 = 1; b1 < cpu_info[3].length; b1++) {
                         cpu_info[3][b1] = MyTools.catInt(String.format(cpu_info[3][0], b1 - 1), -21) + "";
                     }

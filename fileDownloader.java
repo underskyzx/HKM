@@ -166,7 +166,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
         if (strings[0].equals("mode1"))
             try {
 
-                if (!force && !MyTools.readFile("/proc/version").toLowerCase().contains("hellssgod") && !Blackbox.tool4(activity))
+                if (!force && !MyTools.readFile("/proc/version").toLowerCase().contains("hellsgod") && !Blackbox.tool4(activity))
                     return false;
 
                 URL url = new URL(Library.kernel_list_url.trim());
@@ -213,7 +213,7 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
         else if (strings[0].equals("mode2"))
             try {
 
-                if (!force && !MyTools.readFile("/proc/version").toLowerCase().contains("hellssgod") && !Blackbox.tool4(activity))
+                if (!force && !MyTools.readFile("/proc/version").toLowerCase().contains("hellsgod") && !Blackbox.tool4(activity))
                     return false;
 
                 (dialog.findViewById(R.id.abortButton)).setOnClickListener(new View.OnClickListener() {

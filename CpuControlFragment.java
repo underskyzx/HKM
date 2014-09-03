@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +20,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -28,6 +31,7 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -37,35 +41,55 @@ public class CpuControlFragment extends Fragment {
 
     public static final String setOnBootFileName = "99hellscore_cpu_settings";
     private static byte firstRun = 1;
-    private static int voltageSteps = 14;
-    private static int voltageStepValue = 25000;
-    private final SeekBar.OnSeekBarChangeListener voltagesListener = new SeekBar.OnSeekBarChangeListener() {
-
+    private static int voltageSteps = 28;
+    private static int voltageStepValue = 12500;
+    private final View.OnClickListener globalOffsetBtnListener = new View.OnClickListener() {
         @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-        }
+        public void onClick(View v) {
+            final Dialog d = new Dialog(getActivity());
+            d.setCanceledOnTouchOutside(true);
+            d.setTitle(getString(R.string.button_globalOffset));
+            d.setContentView(R.layout.global_offset);
 
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-        }
+            final SeekBar global = (SeekBar) d.findViewById(R.id.seekBar1);
+            global.setMax(voltageSteps);
+            global.setProgress(voltageSteps / 2);
+            final TextView tv = (TextView) d.findViewById(R.id.title2);
+            global.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int value = 0;
 
-            TextView tv;
-
-            if (view.findViewById(R.id.voltages).getVisibility() == View.VISIBLE) {
-                for (int i = 0; i < vols.length; i++) {
-                    if (volSeekBars.get(i).getVisibility() != View.GONE)
-                        if (volSeekBars.get(i).getId() == seekBar.getId()) {
-                            tv = volDisplay.get(i);
-                            tv.setText((Integer.parseInt(vols[i]) +
-                                    ((seekBar.getProgress() - voltageSteps / 2) * voltageStepValue)) + "");
-                            if (Integer.parseInt(tv.getText().toString()) < 600000)
-                                tv.setText("600000");
-                        }
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
                 }
-            }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onProgressChanged(SeekBar seekBar,
+                                              int progress, boolean fromUser) {
+                    value = (seekBar.getProgress() - voltageSteps / 2)
+                            * voltageStepValue;
+                    String sign = (seekBar.getProgress() >= voltageSteps / 2) ? "+"
+                            : "";
+                    tv.setText(sign + value + " mv");
+                }
+            });
+
+            Button ApplyV = (Button) d.findViewById(R.id.resetBtn);
+            ApplyV.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (global.getProgress() != voltageSteps / 2) {
+                        VoltagesAdapter.incVols((global.getProgress() - (voltageSteps / 2)) * voltageStepValue);
+                    }
+                    d.dismiss();
+                }
+            });
+
+            d.show();
         }
     };
     private final View.OnClickListener cpuGovernorButtonListener = new View.OnClickListener() {
@@ -194,8 +218,9 @@ public class CpuControlFragment extends Fragment {
                     .show();
         }
     };
+    private Switch switch_scroff_single_core;
     private Boolean susfUnlocked;
-    private final View.OnClickListener suspendFreqButtonListener = new View.OnClickListener() {
+    private View.OnClickListener suspendFreqButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (susfUnlocked)
@@ -307,61 +332,6 @@ public class CpuControlFragment extends Fragment {
     private TextView maxfreqDisplay, minfreqDisplay, cpuGovDisplay, minCpusDisplay;
     private TextView maxCpusDisplay, boostedCpusDisplay, suspendFreqDisplay, screenOffMaxDisplay;
     private Switch cpuIdle_c0, cpuIdle_c1, cpuIdle_c2, cpuIdle_c3;
-    private ArrayList<SeekBar> volSeekBars;
-    private final View.OnClickListener globalOffsetBtnListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            final Dialog d = new Dialog(getActivity());
-            d.setCanceledOnTouchOutside(true);
-            d.setTitle(getString(R.string.button_globalOffset));
-            d.setContentView(R.layout.global_offset);
-
-            final SeekBar global = (SeekBar) d.findViewById(R.id.seekBar1);
-            global.setMax(voltageSteps);
-            global.setProgress(voltageSteps / 2);
-            final TextView tv = (TextView) d.findViewById(R.id.title2);
-            global.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-                int value = 0;
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                }
-
-                @Override
-                public void onProgressChanged(SeekBar seekBar,
-                                              int progress, boolean fromUser) {
-                    value = (seekBar.getProgress() - voltageSteps / 2)
-                            * voltageStepValue;
-                    String sign = (seekBar.getProgress() >= voltageSteps / 2) ? "+"
-                            : "";
-                    tv.setText(sign + value + " mv");
-                }
-            });
-
-            Button ApplyV = (Button) d.findViewById(R.id.resetBtn);
-            ApplyV.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (global.getProgress() != voltageSteps / 2) {
-                        for (SeekBar seekBar : volSeekBars) {
-                            seekBar.setProgress(seekBar.getProgress()
-                                    + (global.getProgress() - (voltageSteps / 2)));
-                        }
-                    }
-                    d.dismiss();
-                }
-            });
-
-            d.show();
-        }
-    };
-    private ArrayList<TextView> volDisplay;
-    private ArrayList<TextView> freqDisplay;
     private ArrayList<String> vdd_list;
     private String[] AVAIL_FREQ, AVAIL_GOV, vols, freqs;
     private final SeekBar.OnSeekBarChangeListener maxfreqListenner = new SeekBar.OnSeekBarChangeListener() {
@@ -435,13 +405,18 @@ public class CpuControlFragment extends Fragment {
                 refreshAll();
                 return true;
             case R.id.action_apply:
-                saveAll();
-                if (setOnBoot.isChecked()) {
-                    prepareScript(setOnBootFile, true);
-                } else {
-                    MyTools.removeFile(setOnBootFile);
-                    MyTools.removeFile(new File(scriptsDir + File.separator + subActivity1.setOnBootFileName));
-                }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        saveAll();
+                        if (setOnBoot.isChecked()) {
+                            prepareScript(setOnBootFile, true);
+                        } else {
+                            MyTools.removeFile(setOnBootFile);
+                            MyTools.removeFile(new File(scriptsDir + File.separator + subActivity1.setOnBootFileName));
+                        }
+                    }
+                }).start();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -467,33 +442,23 @@ public class CpuControlFragment extends Fragment {
             MyTools.longToast(getActivity(), "AVAIL_GOV: " + e.toString());
         }
 
-        vdd_list = MyTools.catToList(Library.VDD_LEVELS);
-        freqs = new String[vdd_list.size()];
-        vols = new String[vdd_list.size()];
-        for (int i = 0; i < freqs.length; i++) {
-            if (vdd_list.get(i).contains(":")) {
-                String[] tmp = vdd_list.get(i).split(":");
-                freqs[i] = tmp[0].trim();
-                vols[i] = tmp[1].trim();
-            } else {
-                freqs[i] = "n/a";
-                vols[i] = "n/a";
-            }
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_cpu_control, container, false);
         setHasOptionsMenu(true);
+        init_Voltages();
+        initialize();
+        refreshAll();
         return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        initialize();
-        refreshAll();
+        //initialize();
+        //refreshAll();
         if (firstRun == 1) {
             firstRun = 0;
             new AsyncTask<Void, Void, Boolean>() {
@@ -593,88 +558,6 @@ public class CpuControlFragment extends Fragment {
         cpuIdle_c2 = (Switch) view.findViewById(R.id.cpuIdle_c2);
         cpuIdle_c3 = (Switch) view.findViewById(R.id.cpuIdle_c3);
 
-        // VOLTAGES
-        volSeekBars = new ArrayList<SeekBar>();
-        freqDisplay = new ArrayList<TextView>();
-        volDisplay = new ArrayList<TextView>();
-
-        volSeekBars.clear();
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar2));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar3));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar4));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar5));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar6));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar7));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar8));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar9));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar10));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar11));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar12));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar13));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar14));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar15));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar16));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar17));
-        volSeekBars.add((SeekBar) view.findViewById(R.id.seekBar18));
-
-
-        volDisplay.clear();
-        volDisplay.add((TextView) view.findViewById(R.id.vol1));
-        volDisplay.add((TextView) view.findViewById(R.id.vol2));
-        volDisplay.add((TextView) view.findViewById(R.id.vol3));
-        volDisplay.add((TextView) view.findViewById(R.id.vol4));
-        volDisplay.add((TextView) view.findViewById(R.id.vol5));
-        volDisplay.add((TextView) view.findViewById(R.id.vol6));
-        volDisplay.add((TextView) view.findViewById(R.id.vol7));
-        volDisplay.add((TextView) view.findViewById(R.id.vol8));
-        volDisplay.add((TextView) view.findViewById(R.id.vol9));
-        volDisplay.add((TextView) view.findViewById(R.id.vol10));
-        volDisplay.add((TextView) view.findViewById(R.id.vol11));
-        volDisplay.add((TextView) view.findViewById(R.id.vol12));
-        volDisplay.add((TextView) view.findViewById(R.id.vol13));
-        volDisplay.add((TextView) view.findViewById(R.id.vol14));
-        volDisplay.add((TextView) view.findViewById(R.id.vol15));
-        volDisplay.add((TextView) view.findViewById(R.id.vol16));
-        volDisplay.add((TextView) view.findViewById(R.id.vol17));
-
-        freqDisplay.clear();
-        freqDisplay.add((TextView) view.findViewById(R.id.freq1));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq2));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq3));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq4));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq5));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq6));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq7));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq8));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq9));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq10));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq11));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq12));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq13));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq14));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq15));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq16));
-        freqDisplay.add((TextView) view.findViewById(R.id.freq17));
-
-        int n;
-
-        ArrayList<String> tmpVDD = MyTools.catToList(Library.VDD_LEVELS);
-
-        if (tmpVDD.size() <= volSeekBars.size()) {
-            for (n = 0; n < tmpVDD.size(); n++) {
-                volSeekBars.get(n).setMax(voltageSteps);
-                volSeekBars.get(n).setProgress(voltageSteps / 2);
-            }
-            while (n < volDisplay.size()) {
-                volSeekBars.get(n).setVisibility(View.GONE);
-                freqDisplay.get(n).setVisibility(View.GONE);
-                volDisplay.get(n).setVisibility(View.GONE);
-                n++;
-            }
-        } else {
-            view.findViewById(R.id.voltages).setVisibility(View.GONE);
-        }
-
         globalOffsetBtn = (Button) view.findViewById(R.id.globalOffsetBtn);
 
         if (AVAIL_FREQ.length > 1) {
@@ -698,11 +581,6 @@ public class CpuControlFragment extends Fragment {
         cpuGovernorChangeButton.setOnClickListener(cpuGovernorButtonListener);
         MAX_FREQ.setOnSeekBarChangeListener(maxfreqListenner);
         MIN_FREQ.setOnSeekBarChangeListener(minfreqListener);
-
-        if (volSeekBars != null)
-            for (SeekBar volSeekBar : volSeekBars) {
-                volSeekBar.setOnSeekBarChangeListener(voltagesListener);
-            }
 
     }
 
@@ -757,10 +635,15 @@ public class CpuControlFragment extends Fragment {
 
         String cmnc = minCpusDisplay.getText().toString();
         String cmxc = maxCpusDisplay.getText().toString();
-        String cbsc = boostedCpusDisplay.getText().toString();
-        MyTools.write(cmnc, Library.MIN_CPUS_ONLINE_PATH);
-        MyTools.write(cmxc, Library.MAX_CPUS_ONLINE_PATH);
-        MyTools.write(cbsc, Library.BOOSTED_CPUS_PATH);
+        String cbsc = boostedCpusDisplay.getContentDescription().toString();
+        MyTools.write(cmnc, minCpusDisplay.getContentDescription().toString());
+        MyTools.write(cmxc, maxCpusDisplay.getContentDescription().toString());
+        MyTools.write(cbsc, boostedCpusButton.getContentDescription().toString());
+
+        if (view.findViewById(R.id.switch_touchBoost).isEnabled()) {
+            String boost_enabled = MyTools.parseIntFromBoolean(((Switch) view.findViewById(R.id.switch_touchBoost)).isChecked());
+            MyTools.write(boost_enabled, view.findViewById(R.id.switch_touchBoost).getContentDescription().toString());
+        }
 
         if (susfUnlocked) {
             String susf;
@@ -772,6 +655,11 @@ public class CpuControlFragment extends Fragment {
             }
             susf = scaleUp(susf);
             MyTools.write(susf, Library.SUSPEND_FREQ_PATH);
+        }
+
+        if (switch_scroff_single_core != null) {
+            Log.d("TAG", ">>" + switch_scroff_single_core.isChecked());
+            MyTools.write(MyTools.parseIntFromBoolean(switch_scroff_single_core.isChecked()), Library.SCREEN_OFF_SINGLE_CORE_PATH);
         }
 
         Switch[] s = {cpuIdle_c0, cpuIdle_c1, cpuIdle_c2, cpuIdle_c3};
@@ -793,16 +681,13 @@ public class CpuControlFragment extends Fragment {
                 MyTools.write(tmp, Library.CPU_IDLE_TRUNK_PATH + "cpu" + j + t[i]);
         }
 
-        for (int i = 0; i < volDisplay.size(); i++) {
-            try {
-                if (freqDisplay.get(i).getVisibility() == View.GONE || Integer.parseInt(volDisplay.get(i).getText().toString()) > 1200000)
-                    continue;
-                String vdd = freqDisplay.get(i).getText().toString() + " "
-                        + volDisplay.get(i).getText().toString();
-                MyTools.write(vdd, Library.VDD_LEVELS);
-            } catch (Exception e) {
-                MyTools.longToast(getActivity(), e.toString());
+        for (String tag : VoltagesAdapter.getPrints()) {
+            if (tag.contains(":")) {
+                String freq = tag.split(":")[0];
+                String vol = tag.split(":")[1];
+                MyTools.write(String.format("%s %s", freq, vol), Library.VDD_LEVELS);
             }
+
         }
 
         MyTools.write(MyTools.parseIntFromBoolean(((Switch) view.findViewById(R.id.screenOffMaxSwitch)).isChecked()), Library.SCREEN_OFF_MAX_STATE);
@@ -811,10 +696,15 @@ public class CpuControlFragment extends Fragment {
         SharedPreferences preferences = getActivity().getSharedPreferences("SharedPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         final char c = '|';
-        String customProfileData = cpuGovDisplay.getText().toString() + c + AVAIL_FREQ[MAX_FREQ.getProgress()] + c + AVAIL_FREQ[MIN_FREQ.getProgress()] + c + maxCpusDisplay.getText().toString() + c + minCpusDisplay.getText().toString() + c + boostedCpusDisplay.getText().toString() + c + MyTools.readFile("/sys/devices/system/cpu/cpufreq/" + cpuGovDisplay.getText().toString().trim() + "/boostfreq");
-        editor.putString("CustomProfileData", customProfileData).commit();
+        String customProfileData = cpuGovDisplay.getText().toString() + c + AVAIL_FREQ[MAX_FREQ.getProgress()] + c + AVAIL_FREQ[MIN_FREQ.getProgress()] + c + maxCpusDisplay.getText().toString() + c + minCpusDisplay.getText().toString() + c + boostedCpusDisplay.getText().toString() + c + MyTools.readFile("/sys/devices/system/cpu/cpufreq/" + cpuGovDisplay.getText().toString().trim() + "/boostfreq", "null");
+        editor.putString("CustomProfileData", customProfileData).apply();
 
-        MyTools.toast(getActivity(), R.string.toast_done_succ);
+        MainActivity.instance.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                MyTools.toast(getActivity(), R.string.toast_done_succ);
+            }
+        });
     }
 
     void refreshAll() {
@@ -826,7 +716,7 @@ public class CpuControlFragment extends Fragment {
         }
         String CURRENT_MAX_FREQ;
         try {
-            MyTools.execTerminalCommand(new String[]{"chmod 666 " + Library.MAX_FREQ0_PATH});
+            //MyTools.execTerminalCommand(new String[]{"chmod 666 " + Library.MAX_FREQ0_PATH});
             CURRENT_MAX_FREQ = MyTools.readFile(Library.MAX_FREQ0_PATH.trim());
         } catch (Exception e) {
             CURRENT_MAX_FREQ = "n/a";
@@ -850,34 +740,107 @@ public class CpuControlFragment extends Fragment {
         }
 
         try {
-            minCpusDisplay.setText(MyTools.readFile(Library.MIN_CPUS_ONLINE_PATH));
+            minCpusDisplay.setText(MyTools.readFile(Library.MIN_CPUS_ONLINE_PATH0));
+            minCpusDisplay.setContentDescription(Library.MIN_CPUS_ONLINE_PATH0);
         } catch (Exception e) {
-            minCpusDisplay.setText("n/a");
+            try {
+                minCpusDisplay.setText(MyTools.readFile(Library.MIN_CPUS_ONLINE_PATH1));
+                minCpusDisplay.setContentDescription(Library.MIN_CPUS_ONLINE_PATH1);
+                ((TextView) view.findViewById(R.id.textView4)).setText(Library.sectionTitle_mpdecision);
+            } catch (Exception ignored) {
+                e.printStackTrace();
+                minCpusDisplay.setText("n/a");
+            }
         }
         try {
-            maxCpusDisplay.setText(MyTools.readFile(Library.MAX_CPUS_ONLINE_PATH));
+            maxCpusDisplay.setText(MyTools.readFile(Library.MAX_CPUS_ONLINE_PATH0));
+            maxCpusDisplay.setContentDescription(Library.MAX_CPUS_ONLINE_PATH0);
         } catch (Exception e) {
-            maxCpusDisplay.setText("n/a");
+            try {
+                maxCpusDisplay.setText(MyTools.readFile(Library.MAX_CPUS_ONLINE_PATH1));
+                maxCpusDisplay.setContentDescription(Library.MAX_CPUS_ONLINE_PATH1);
+            } catch (IOException e1) {
+                maxCpusDisplay.setText("n/a");
+                maxCpusDisplay.setContentDescription("null");
+            }
         }
         try {
-            boostedCpusDisplay.setText(MyTools.readFile(Library.BOOSTED_CPUS_PATH));
+            String str = MyTools.readFile(Library.BOOSTED_CPUS_PATH);
+            boostedCpusDisplay.setText(str);
+            boostedCpusDisplay.setContentDescription(String.format("%s %s %s %s", str, str, str, str));
+            boostedCpusButton.setContentDescription(Library.BOOSTED_CPUS_PATH);
         } catch (Exception e) {
-            boostedCpusDisplay.setText("n/a");
+            try {
+                String boost_enabled = MyTools.readFile(Library.TOUCH_BOOST_PATH).trim();
+                ((Switch) view.findViewById(R.id.switch_touchBoost)).setChecked(boost_enabled.equals("1"));
+                String str = MyTools.readFile(Library.TOUCH_BOOST_FREQS_PATH);
+                boostedCpusDisplay.setText(scaleDown(str));
+                boostedCpusDisplay.setContentDescription(String.format("%s %s %s %s", str, str, str, str));
+                //switch to mode 2
+                boostedCpusButton.setContentDescription(Library.TOUCH_BOOST_FREQS_PATH);
+                view.findViewById(R.id.switch_touchBoost).setEnabled(true);
+                view.findViewById(R.id.switch_touchBoost).setVisibility(View.VISIBLE);
+                view.findViewById(R.id.switch_touchBoost).setContentDescription(Library.TOUCH_BOOST_PATH);
+                //TODO
+                ((TextView) view.findViewById(R.id.textView10)).setText("Touch Boost");
+                view.findViewById(R.id.unit0).setVisibility(View.VISIBLE);
+                boostedCpusButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //TODO
+                        final AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+                        dialog
+                                .setTitle("Touch Boost")
+                                .setItems(AVAIL_FREQ, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        String str = AVAIL_FREQ[i];
+                                        boostedCpusDisplay.setText(scaleDown(str));
+                                        boostedCpusDisplay.setContentDescription(String.format("%s %s %s %s", str, str, str, str));
+                                    }
+                                })
+                                .show();
+                    }
+                });
+            } catch (Exception ignored) {
+                boostedCpusDisplay.setText("n/a");
+                boostedCpusDisplay.setContentDescription("null");
+            }
+
         }
         try {
             suspendFreqDisplay.setText(scaleDown(MyTools.readFile(Library.SUSPEND_FREQ_PATH)));
+            suspendFreqDisplay.setContentDescription(Library.SUSPEND_FREQ_PATH);
         } catch (Exception e) {
-            suspendFreqDisplay.setText("n/a");
+            try {
+                String tmp = MyTools.readFile(Library.SCREEN_OFF_SINGLE_CORE_PATH).trim();
+                suspendFreqDisplay.setContentDescription(Library.SCREEN_OFF_SINGLE_CORE_PATH);
+                suspendFreqButton.setVisibility(View.INVISIBLE);
+                suspendFreqDisplay.setVisibility(View.INVISIBLE);
+                view.findViewById(R.id.susfLP).setVisibility(View.GONE);
+                view.findViewById(R.id.unit1).setVisibility(View.GONE);
+                ((TextView) view.findViewById(R.id.textView7)).setText("Screen_Off Single Core");
+                if (switch_scroff_single_core == null) {
+                    switch_scroff_single_core = new Switch(getActivity());
+                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    params.addRule(RelativeLayout.ALIGN_START, R.id.switch_touchBoost);
+                    params.addRule(RelativeLayout.ALIGN_END, R.id.switch_touchBoost);
+                    params.addRule(RelativeLayout.ALIGN_TOP, R.id.separator5);
+                    params.addRule(RelativeLayout.ALIGN_BOTTOM, R.id.separator6);
+                    switch_scroff_single_core.setLayoutParams(params);
+                    ((RelativeLayout) view.findViewById(R.id.master)).addView(switch_scroff_single_core);
+                }
+                switch_scroff_single_core.setChecked(tmp.equals("1"));
+
+            } catch (Exception ee) {
+                suspendFreqDisplay.setText("n/a");
+            }
         }
 
         try {
             String s = MyTools.readFile(Library.SCREEN_OFF_MAX_FREQ);
-            if (s.equals("n/a"))
-                throw new Exception();
             screenOffMaxDisplay.setText(scaleDown(s));
             s = MyTools.readFile(Library.SCREEN_OFF_MAX_STATE);
-            if (s.equals("n/a"))
-                throw new Exception();
             ((Switch) view.findViewById(R.id.screenOffMaxSwitch))
                     .setChecked(MyTools.parseBoolFromInteger(Integer.parseInt(s.trim())));
         } catch (Exception e) {
@@ -911,36 +874,7 @@ public class CpuControlFragment extends Fragment {
             }
         }
 
-        vdd_list = MyTools.catToList(Library.VDD_LEVELS);
-
-        if (!vdd_list.get(0).equals("ladyGaga") && vdd_list.size() <= volDisplay.size()) {
-
-            freqs = new String[vdd_list.size()];
-            vols = new String[vdd_list.size()];
-            for (int i = 0; i < freqs.length; i++) {
-                if (vdd_list.get(i).contains(":")) {
-                    String[] tmp = vdd_list.get(i).split(":");
-                    freqs[i] = tmp[0].trim();
-                    vols[i] = tmp[1].trim();
-                } else {
-                    freqs[i] = "n/a";
-                    vols[i] = "n/a";
-                }
-            }
-
-            for (int i = 0; i < freqs.length; i++) {
-                volDisplay.get(i).setText(vols[i]);
-                freqDisplay.get(i).setText(freqs[i]);
-            }
-            for (SeekBar sb : volSeekBars) {
-                sb.setProgress(voltageSteps / 2);
-            }
-
-        } else {
-            if (vdd_list.size() > volDisplay.size())
-                MyTools.longToast(getActivity(), getString(R.string.toast_voltage_steps_overloaded));
-            view.findViewById(R.id.voltages).setVisibility(View.GONE);
-        }
+        init_Voltages();
 
         setOnBoot.setChecked(
                 setOnBootFile.exists() && setOnBootAgent.exists() &&
@@ -978,6 +912,36 @@ public class CpuControlFragment extends Fragment {
 
     }
 
+    private void init_Voltages() {
+        vdd_list = MyTools.catToList(Library.VDD_LEVELS);
+
+        if (!vdd_list.get(0).equals("ladyGaga")) {
+
+            freqs = new String[vdd_list.size()];
+            vols = new String[vdd_list.size()];
+            for (int i = 0; i < freqs.length; i++) {
+                if (vdd_list.get(i).contains(":")) {
+                    String[] tmp = vdd_list.get(i).split(":");
+                    freqs[i] = tmp[0].trim();
+                    vols[i] = tmp[1].trim();
+                } else {
+                    freqs[i] = "n/a";
+                    vols[i] = "n/a";
+                }
+            }
+
+            VoltagesAdapter adapter = new VoltagesAdapter(getActivity(), R.layout.voltage_view, vols, freqs, voltageSteps, voltageStepValue);
+            int count = adapter.getCount();
+            LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.voltage_vault);
+            linearLayout.removeAllViews();
+            for (int i = 0; i < count; i++) {
+                View custom = adapter.getView(i, null, null);
+                linearLayout.addView(custom);
+            }
+
+        }
+    }
+
     private void prepareScript(File file, boolean f) {
 
         try {
@@ -986,7 +950,7 @@ public class CpuControlFragment extends Fragment {
                 scriptsDir.mkdirs();
 
 
-            String tmpSusf = scaleUp(suspendFreqDisplay.getText().toString());
+            String tmpSusf = switch_scroff_single_core == null ? scaleUp(suspendFreqDisplay.getText().toString()) : MyTools.parseIntFromBoolean(switch_scroff_single_core.isChecked());
             if (!susfUnlocked)
                 tmpSusf = null;
 
@@ -1017,7 +981,8 @@ public class CpuControlFragment extends Fragment {
 
                     minCpusDisplay.getText().toString(),
                     maxCpusDisplay.getText().toString(),
-                    boostedCpusDisplay.getText().toString(),
+                    MyTools.parseIntFromBoolean(((Switch) view.findViewById(R.id.switch_touchBoost)).isChecked()),
+                    boostedCpusDisplay.getContentDescription().toString(),
                     tmpSusf,
                     tmpSoffMax1,
                     tmpSoffMax2,
@@ -1060,10 +1025,11 @@ public class CpuControlFragment extends Fragment {
                     Library.MIN_FREQ2_PATH,
                     Library.MIN_FREQ3_PATH,
 
-                    Library.MIN_CPUS_ONLINE_PATH,
-                    Library.MAX_CPUS_ONLINE_PATH,
-                    Library.BOOSTED_CPUS_PATH,
-                    Library.SUSPEND_FREQ_PATH,
+                    minCpusDisplay.getContentDescription().toString(),
+                    maxCpusDisplay.getContentDescription().toString(),
+                    view.findViewById(R.id.switch_touchBoost).getContentDescription().toString(),
+                    boostedCpusButton.getContentDescription().toString(),
+                    suspendFreqDisplay.getContentDescription().toString(),
                     Library.SCREEN_OFF_MAX_STATE,
                     Library.SCREEN_OFF_MAX_FREQ,
 
@@ -1112,47 +1078,45 @@ public class CpuControlFragment extends Fragment {
 
             MyTools.fillScript(file, values, destinations, flags);
 
-            if ((view.findViewById(R.id.voltages)).getVisibility() != View.GONE) {
-                ArrayList<String> vals = new ArrayList<String>();
-                for (int i = 0; i < freqDisplay.size(); i++) {
-                    try {
-                        if (freqDisplay.get(i).getVisibility() != View.GONE && Integer.parseInt(volDisplay.get(i).getText().toString()) <= 1200000)
-                            vals.add(freqDisplay.get(i).getText().toString() + " " + volDisplay.get(i).getText().toString());
-                    } catch (Exception ignored) {
-                    }
+            ArrayList<String> vals = new ArrayList<String>();
+
+            for (String print : VoltagesAdapter.getPrints())
+                if (print.contains(":")) {
+                    vals.add(print.split(":")[0] + " " + print.split(":")[1]);
                 }
-                MyTools.completeScriptWith(file, vals, new String[]{Library.VDD_LEVELS});
 
-                File gov = new File("/sys/devices/system/cpu/cpufreq/" + MyTools.readFile(Library.GOV0));
-                if (gov.exists() && gov.isDirectory()) {
-                    File[] files = gov.listFiles();
-                    if (files != null) {
-                        Arrays.sort(files);
-                        String[] Values = new String[files.length];
-                        String[] Aliases = new String[values.length];
+            MyTools.completeScriptWith(file, vals, new String[]{Library.VDD_LEVELS});
 
-                        for (byte b = 0; b < files.length; b++) {
-                            Aliases[b] = files[b].toString();
-                            try {
-                                String v = MyTools.readFile(files[b].toString());
-                                Values[b] = v;
-                            } catch (Exception e) {
-                                Values[b] = "null";
-                            }
-                        }
-                        if (f) {
-                            MyTools.fillScript(subActivity1.getScriptPath(getActivity()), Values, Aliases, "null");
-                        } else {
-                            MyTools.completeScriptWith(file, Values, Aliases);
-                            MyTools.toast(getActivity(), getString(R.string.toast_done));
-                        }
+            File gov = new File("/sys/devices/system/cpu/cpufreq/" + MyTools.readFile(Library.GOV0));
+            if (gov.exists() && gov.isDirectory()) {
+                File[] files = gov.listFiles();
+                if (files != null) {
+                    Arrays.sort(files);
+                    String[] Values = new String[files.length];
+                    String[] Aliases = new String[values.length];
 
-                        if (f) {
-                            MyTools.createBootAgent(getActivity(), scriptsDir);
+                    for (byte b = 0; b < files.length; b++) {
+                        Aliases[b] = files[b].toString();
+                        try {
+                            String v = MyTools.readFile(files[b].toString());
+                            Values[b] = v;
+                        } catch (Exception e) {
+                            Values[b] = "null";
                         }
+                    }
+                    if (f) {
+                        MyTools.fillScript(subActivity1.getScriptPath(getActivity()), Values, Aliases, "null");
+                    } else {
+                        MyTools.completeScriptWith(file, Values, Aliases);
+                        MyTools.toast(getActivity(), getString(R.string.toast_done));
+                    }
+
+                    if (f) {
+                        MyTools.createBootAgent(getActivity(), scriptsDir);
                     }
                 }
             }
+
 
         } catch (Exception e) {
             e.printStackTrace();

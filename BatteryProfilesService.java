@@ -53,10 +53,6 @@ public class BatteryProfilesService extends Service {
                     } else {
                         apply(preferences);
                     }
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    }
                 }
             }
         }, 0, 5000);
@@ -107,8 +103,8 @@ public class BatteryProfilesService extends Service {
                     Library.GOV0,
                     Library.MAX_FREQ0_PATH,
                     Library.MIN_FREQ0_PATH,
-                    Library.MAX_CPUS_ONLINE_PATH,
-                    Library.MIN_CPUS_ONLINE_PATH,
+                    Library.MAX_CPUS_ONLINE_PATH0,
+                    Library.MIN_CPUS_ONLINE_PATH0,
                     Library.BOOSTED_CPUS_PATH,
                     "/sys/devices/system/cpu/cpufreq/" + values[0].trim() + "/boostfreq",
                     "/sys/devices/system/cpu/cpufreq/" + values[0].trim() + "/lmf_active_max_freq"
@@ -164,8 +160,8 @@ public class BatteryProfilesService extends Service {
                     Library.GOV0,
                     Library.MAX_FREQ0_PATH,
                     Library.MIN_FREQ0_PATH,
-                    Library.MAX_CPUS_ONLINE_PATH,
-                    Library.MIN_CPUS_ONLINE_PATH,
+                    Library.MAX_CPUS_ONLINE_PATH0,
+                    Library.MIN_CPUS_ONLINE_PATH0,
                     Library.BOOSTED_CPUS_PATH,
                     "/sys/devices/system/cpu/cpufreq/" + values[0].trim() + "/boostfreq",
                     "/sys/devices/system/cpu/cpufreq/" + values[0].trim() + "/lmf_active_max_freq"

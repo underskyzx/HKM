@@ -163,7 +163,7 @@ public class InfoTabFragment extends Fragment {
         appVersion.setText(MainActivity.appVersion);
         assert view != null;
         TextView kernelVersion = (TextView) view.findViewById(R.id.textView3);
-        kernelVersion.setText(MyTools.readFile("/proc/version"));
+        kernelVersion.setText(MyTools.readFile("/proc/version", "n/a"));
         final WebView browser = (WebView) view.findViewById(R.id.webView);
         browser.setVisibility(View.GONE);
         WebSettings webSettings = browser.getSettings();

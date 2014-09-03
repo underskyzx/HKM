@@ -55,7 +55,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
         view = inflater.inflate(R.layout.fragment_sound_control, container, false);
         setHasOptionsMenu(true);
 
-        String s = MyTools.readFile(Library.SOUND_CONTROL_VERSION_PATH);
+        String s = MyTools.readFile(Library.SOUND_CONTROL_VERSION_PATH, "null");
         if (!s.equals("n/a")) {
             TextView tv = (TextView) view.findViewById(R.id.title);
             if (s.contains(":"))
@@ -151,7 +151,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
 
         String a, b, c, d, e;
         {
-            a = MyTools.readFile(Library.HP_GAIN_PATH);
+            a = MyTools.readFile(Library.HP_GAIN_PATH, "null");
             try {
                 short a1 = Blackbox.tool3(Short.parseShort((a.split(" "))[0]), (byte) 1);
                 short a2 = Blackbox.tool3(Short.parseShort((a.split(" "))[1]), (byte) 1);
@@ -166,7 +166,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
             }
         }
         {
-            b = MyTools.readFile(Library.HP_PA_GAIN_PATH);
+            b = MyTools.readFile(Library.HP_PA_GAIN_PATH, "null");
             try {
                 short b1 = Blackbox.tool3(Short.parseShort((b.split(" "))[0]), (byte) 2);
                 short b2 = Blackbox.tool3(Short.parseShort((b.split(" "))[1]), (byte) 2);
@@ -181,7 +181,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
             }
         }
         {
-            c = MyTools.readFile(Library.SPEAKER_GAIN_PATH);
+            c = MyTools.readFile(Library.SPEAKER_GAIN_PATH, "null");
             try {
                 short c1 = Blackbox.tool3(Short.parseShort((c.split(" "))[0]), (byte) 1);
                 short c2 = Blackbox.tool3(Short.parseShort((c.split(" "))[1]), (byte) 1);
@@ -196,7 +196,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
             }
         }
         {
-            d = MyTools.readFile(Library.MIC_GAIN_PATH);
+            d = MyTools.readFile(Library.MIC_GAIN_PATH, "null");
             try {
                 short d1 = Blackbox.tool3(Short.parseShort((d.split(" "))[0]), (byte) 1);
                 mic_gain_display.setText(Short.toString(d1));
@@ -207,7 +207,7 @@ public class SoundControlFragment extends Fragment implements SeekBar.OnSeekBarC
             }
         }
         {
-            e = MyTools.readFile(Library.CAMMIC_GAIN_PATH);
+            e = MyTools.readFile(Library.CAMMIC_GAIN_PATH, "null");
             try {
                 short e1 = Blackbox.tool3(Short.parseShort((e.split(" "))[0]), (byte) 1);
                 camMic_gain_display.setText(Short.toString(e1));

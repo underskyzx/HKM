@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 
@@ -24,12 +26,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import eu.chainfire.libsuperuser.Shell;
+
 
 public class MiscFragment extends Fragment {
 
     public static final String setOnBootFileName = "95hellscore_misc_settings";
+    private static ViewGroup.LayoutParams XlayoutParams;
     private View view;
-    private Spinner spinner1;
+    private Spinner spinner1, spinner2;
     private EditText readAhead_field, thrott_field, vibrator_field;
     private Switch dynFsyncSwitch, fastChargeSwitch;
     private CheckBox setOnBoot;
@@ -62,6 +67,8 @@ public class MiscFragment extends Fragment {
         dynFsyncSwitch = (Switch) view.findViewById(R.id.switch1);
         fastChargeSwitch = (Switch) view.findViewById(R.id.switch2);
 
+        spinner2 = (Spinner) view.findViewById(R.id.spinner0);
+
         StringBuffer tmp;
         try {
             tmp = new StringBuffer(MyTools.readFile(Library.IO_SCHED_PATH));
@@ -86,6 +93,12 @@ public class MiscFragment extends Fragment {
     }
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
         inflater.inflate(R.menu.main, menu);
@@ -98,6 +111,8 @@ public class MiscFragment extends Fragment {
                 refreshAll();
                 return true;
             case R.id.action_apply:
+                if (XlayoutParams != null)
+                    view.findViewById(R.id.editText4).setLayoutParams(XlayoutParams);
                 saveAll();
                 if (setOnBoot.isChecked())
                     prepareBootScript();
@@ -110,6 +125,10 @@ public class MiscFragment extends Fragment {
 
     private void refreshAll() {
         view.clearFocus();
+
+        if (XlayoutParams != null)
+            view.findViewById(R.id.editText4).setLayoutParams(XlayoutParams);
+
         String tmp0;
         try {
             tmp0 = MyTools.readFile(Library.IO_SCHED_PATH);
@@ -148,8 +167,14 @@ public class MiscFragment extends Fragment {
                 dynFsyncSwitch.setChecked(false);
             }
         } catch (Exception e) {
-            dynFsyncSwitch.setChecked(false);
-            MyTools.longToast(getActivity(), "FSync: " + e.toString());
+            try {
+                dynFsyncSwitch.setVisibility(View.GONE);
+                view.findViewById(R.id.textView3).setVisibility(View.GONE);
+                view.findViewById(R.id.separator5).setVisibility(View.GONE);
+                dynFsyncSwitch = null;
+                //MyTools.longToast(getActivity(), "FSync: " + e.toString());
+            } catch (Exception ignored) {
+            }
         }
 
         try {
@@ -168,6 +193,48 @@ public class MiscFragment extends Fragment {
         } catch (Exception e) {
             vibrator_field.setText("n/a");
             MyTools.longToast(getActivity(), "Vib_Strength: " + e.toString());
+        }
+
+        try {
+            String s = Shell.SH.run("sysctl net.ipv4.tcp_allowed_congestion_control").get(0);
+            String sx = Shell.SH.run("getprop net.ipv4.tcp_congestion_control").get(0);
+            String[] tab = s.split("=");
+            tab = tab[1].trim().split(" ");
+            spinner2.setAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, tab));
+            spinner2.setSelection(indexOf(tab, sx));
+        } catch (Exception ignored) {
+        } catch (Error ignored) {
+        }
+
+        try {
+            String s = Shell.SH.run("getprop net.hostname").get(0).trim();
+            ((EditText) view.findViewById(R.id.editText4)).setText(s);
+
+            view.findViewById(R.id.editText4).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View view, boolean b) {
+
+                    if (!b && XlayoutParams != null) {
+                        view.findViewById(R.id.editText4).setLayoutParams(XlayoutParams);
+                        return;
+                    }
+
+                    if (XlayoutParams == null)
+                        XlayoutParams = view.getLayoutParams();
+
+                    int i = getResources().getDisplayMetrics().widthPixels;
+                    i /= 2;
+                    i -= 15;
+                    if (b) {
+                        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(i, -1);
+                        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+                        view.setLayoutParams(params);
+                    }
+
+
+                }
+            });
+        } catch (Exception ignored) {
         }
 
         setOnBoot.setChecked(
@@ -195,7 +262,8 @@ public class MiscFragment extends Fragment {
             MyTools.write(AVAIL_SCHED[spinner1.getSelectedItemPosition()], Library.IO_SCHED_PATH);
             MyTools.write(readAhead_field.getText().toString(), Library.READ_AHEAD_BUFFER_PATH);
 
-            MyTools.write(MyTools.parseIntFromBoolean(dynFsyncSwitch.isChecked()), Library.DYN_FSYNC_PATH);
+            if (dynFsyncSwitch != null)
+                MyTools.write(MyTools.parseIntFromBoolean(dynFsyncSwitch.isChecked()), Library.DYN_FSYNC_PATH);
             MyTools.write(MyTools.parseIntFromBoolean(fastChargeSwitch.isChecked()), Library.FASTCHARGE_PATH);
 
             MyTools.write(thrott_field.getText().toString(), Library.MSM_THERMAL_PATH);
@@ -204,6 +272,15 @@ public class MiscFragment extends Fragment {
                 vibrator_field.setText("100");
 
             MyTools.write(vibrator_field.getText().toString(), Library.VIBRATOR_AMP);
+
+            MyTools.execTerminalCommand(new String[]
+                            {
+                                    "setprop net.hostname " + ((EditText) view.findViewById(R.id.editText4)).getText().toString(),
+                                    "setprop net.ipv4.tcp_congestion_control " + ((Spinner) view.findViewById(R.id.spinner0)).getSelectedItem().toString()
+
+                            }
+            );
+
             MyTools.toast(getActivity(), R.string.toast_done_succ);
         } catch (Exception ignored) {
             MyTools.longToast(getActivity(), R.string.toast_failed);
@@ -224,7 +301,7 @@ public class MiscFragment extends Fragment {
                     AVAIL_SCHED[spinner1.getSelectedItemPosition()],
                     readAhead_field.getText().toString(),
                     thrott_field.getText().toString(),
-                    MyTools.parseIntFromBoolean(dynFsyncSwitch.isChecked()),
+                    dynFsyncSwitch != null ? MyTools.parseIntFromBoolean(dynFsyncSwitch.isChecked()) : null,
                     MyTools.parseIntFromBoolean(fastChargeSwitch.isChecked()),
                     vibrator_field.getText().toString()
             };
@@ -265,6 +342,23 @@ public class MiscFragment extends Fragment {
 
     private void removeBootFile() {
         MyTools.removeFile(setOnBootFile);
+    }
+
+    public int dpToPx(int dp) {
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return px;
+    }
+
+    public int indexOf(String[] strings, String string) {
+        if (string != null && strings != null) {
+            for (int i = 0; i < strings.length; i++) {
+                if (strings[i].equalsIgnoreCase(string)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 
 }

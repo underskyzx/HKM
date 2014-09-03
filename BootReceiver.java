@@ -16,7 +16,7 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, Intent ignored) {
 
-        String kernel = MyTools.readFile("/proc/version");
+        String kernel = MyTools.readFile("/proc/version", "n/a");
         if (kernel.toLowerCase().contains("hells") || Blackbox.tool4(context))
             try {
                 Shell.SH.run(String.format("echo `date +%s` -- boot intent received >> %s", "+%T", "/sdcard/HKM.log"));

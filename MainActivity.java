@@ -37,6 +37,8 @@ import java.io.File;
 
 public class MainActivity extends FragmentActivity implements TabListener {
 
+    public static MainActivity instance;
+
     public static String appVersion;
     private int counter = 0;
 
@@ -86,6 +88,12 @@ public class MainActivity extends FragmentActivity implements TabListener {
         ((EditText) dialog.findViewById(R.id.message))
                 .setText(Library.donation_email);
         dialog.show();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        instance = this;
     }
 
     @Override

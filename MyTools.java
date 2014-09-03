@@ -14,6 +14,7 @@ import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -97,16 +98,12 @@ public class MyTools {
         }
     }
 
-    public static String readFile(String fp) {
+    public static String readFile(String fp) throws FileNotFoundException, IOException {
         File f = new File(fp);
         if (f.exists() && f.isFile()) {
             if (f.canRead()) {
-                try {
-                    BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
-                    return bufferedReader.readLine();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
+                return bufferedReader.readLine();
             } else {
                 File filesDir = new File(dataDir + "Files");
                 if (!filesDir.exists() && !filesDir.isDirectory()) {
@@ -114,20 +111,27 @@ public class MyTools {
                 }
                 File dump = new File(filesDir.toString() + "dump.bin");
                 if (!dump.exists()) {
-                    try {
-                        dump.createNewFile();
-                    } catch (IOException ignored) {
-                    }
+                    dump.createNewFile();
                 }
                 Shell.SU.run("cat " + f.toString() + " > " + dump.toString());
                 Shell.SU.run("chmod 666 " + f.toString());
+
                 if (dump.exists() && dump.isFile())
                     return readDump(dump.toString());
                 else
-                    return "n/a";
+                    throw new IOException();
             }
+        } else {
+            throw new FileNotFoundException();
         }
-        return "n/a";
+    }
+
+    public static String readFile(String fp, String errorCode) {
+        try {
+            return readFile(fp);
+        } catch (Exception e) {
+            return errorCode;
+        }
     }
 
     public static int catInt(String file, int errorCode) {
@@ -346,6 +350,10 @@ public class MyTools {
 
     public static Boolean parseBoolFromInteger(int i) {
         return (i != 0);
+    }
+
+    public static Boolean parseBoolFromString(String s) {
+        return (!s.trim().equals("0"));
     }
 
     public static String[] addToArray(String[] array, String string, int index) {

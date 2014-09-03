@@ -35,7 +35,12 @@ public class BaseActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
-        String kernel = MyTools.readFile("/proc/version");
+        String kernel;
+        try {
+            kernel = MyTools.readFile("/proc/version");
+        } catch (Exception ignored) {
+            kernel = "n/a";
+        }
         if (kernel.toLowerCase().contains("hells") || Blackbox.tool4(getApplicationContext())) {
             final SharedPreferences preferences = getSharedPreferences("SharedPrefs", MODE_PRIVATE);
             boolean b = preferences.getBoolean("ShowRatingDisclaimer", true);

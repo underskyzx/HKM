@@ -131,13 +131,13 @@ public final class ProfilesActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        maxFreq = MyTools.readFile(Library.MAX_FREQ0_PATH);
-        minFreq = MyTools.readFile(Library.MIN_FREQ0_PATH);
-        maxCores = MyTools.readFile(Library.MAX_CPUS_ONLINE_PATH);
-        minCores = MyTools.readFile(Library.MIN_CPUS_ONLINE_PATH);
-        cpuBoost = MyTools.readFile(Library.BOOSTED_CPUS_PATH);
-        governor = MyTools.readFile(Library.GOV0);
-        boostFreq = MyTools.readFile("/sys/devices/system/cpu/cpufreq/" + governor + "/boostfreq");
+        maxFreq = MyTools.readFile(Library.MAX_FREQ0_PATH, "n/a");
+        minFreq = MyTools.readFile(Library.MIN_FREQ0_PATH, "n/a");
+        maxCores = MyTools.readFile(Library.MAX_CPUS_ONLINE_PATH0, "n/a");
+        minCores = MyTools.readFile(Library.MIN_CPUS_ONLINE_PATH0, "n/a");
+        cpuBoost = MyTools.readFile(Library.BOOSTED_CPUS_PATH, "n/a");
+        governor = MyTools.readFile(Library.GOV0, "n/a");
+        boostFreq = MyTools.readFile("/sys/devices/system/cpu/cpufreq/" + governor + "/boostfreq", "n/a");
     }
 
     @Override
@@ -234,8 +234,8 @@ public final class ProfilesActivity extends Activity {
                 Library.GOV0,
                 Library.MAX_FREQ0_PATH,
                 Library.MIN_FREQ0_PATH,
-                Library.MAX_CPUS_ONLINE_PATH,
-                Library.MIN_CPUS_ONLINE_PATH,
+                Library.MAX_CPUS_ONLINE_PATH0,
+                Library.MIN_CPUS_ONLINE_PATH0,
                 Library.BOOSTED_CPUS_PATH,
                 "/sys/devices/system/cpu/cpufreq/" + nextGov.getText().toString() + "/boostfreq",
                 "/sys/devices/system/cpu/cpufreq/" + nextGov.getText().toString() + "/lmf_active_max_freq"
