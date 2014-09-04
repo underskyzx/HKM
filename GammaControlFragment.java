@@ -93,6 +93,13 @@ public class GammaControlFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (!expBrVerified)
+            MyTools.write("1", Library.BRIGHTNESS_MODE_PATH);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_gamma_control, container, false);
@@ -128,78 +135,89 @@ public class GammaControlFragment extends Fragment {
 
         expBr = (CheckBox) view.findViewById(R.id.expBr);
 
-        expBr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, final boolean checked) {
-                String s = MyTools.parseIntFromBoolean(!checked);
-                MyTools.write(s, Library.BRIGHTNESS_MODE_PATH);
-                //TODO
-                if (checked) {
-                    expBrVerified = false;
-                    final Dialog dialog = new Dialog(getActivity());
-                    dialog.setContentView(R.layout.dialog_brightness_mode);
-                    dialog.setTitle(getString(R.string.title_confirmation));
-                    dialog.setCanceledOnTouchOutside(true);
-                    dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialogInterface) {
-                            expBrVerified = false;
-                            MyTools.write(MyTools.parseIntFromBoolean(checked), Library.BRIGHTNESS_MODE_PATH);
-                            expBr.setChecked(false);
-                        }
-                    });
-                    dialog.show();
-
-                    dialog.findViewById(R.id.positive_button).setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            expBrVerified = true;
-                            dialog.dismiss();
-                        }
-                    });
-
-                    dialog.findViewById(R.id.negative_button).setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            dialog.cancel();
-                        }
-                    });
-
-                    new AsyncTask<Void, Integer, Void>() {
-                        TextView view1 = (TextView) dialog.findViewById(R.id.message);
-
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            int i = 9;
-                            try {
-                                while (dialog.isShowing() && !expBrVerified && i > 0) {
-                                    publishProgress(i--);
-                                    Thread.sleep(1000);
-                                }
-
-                            } catch (Exception ignored) {
-                                view1.setVisibility(View.GONE);
-                            }
-                            return null;
-                        }
-
-                        @Override
-                        protected void onProgressUpdate(Integer... values) {
-                            super.onProgressUpdate(values);
-                            view1.setText(String.format("Reverting to previous settings in %s seconds", values[0]));
-                        }
-
-                        @Override
-                        protected void onPostExecute(Void aVoid) {
-                            super.onPostExecute(aVoid);
-                            if (!expBrVerified)
-                                dialog.cancel();
-                        }
-                    }.execute();
-
-                }
+        try {
+            expBr.setChecked(!MyTools.parseBoolFromString(MyTools.readFile(Library.BRIGHTNESS_MODE_PATH).trim()));
+        } catch (Exception e) {
+            try {
+                expBr.setVisibility(View.GONE);
+                expBr = null;
+            } catch (Exception ignored) {
             }
-        });
+        }
+
+        if (expBr != null)
+            expBr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, final boolean checked) {
+                    String s = MyTools.parseIntFromBoolean(!checked);
+                    MyTools.write(s, Library.BRIGHTNESS_MODE_PATH);
+                    //TODO
+                    if (checked) {
+                        expBrVerified = false;
+                        final Dialog dialog = new Dialog(getActivity());
+                        dialog.setContentView(R.layout.dialog_brightness_mode);
+                        dialog.setTitle(getString(R.string.title_confirmation));
+                        dialog.setCanceledOnTouchOutside(true);
+                        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialogInterface) {
+                                expBrVerified = false;
+                                MyTools.write(MyTools.parseIntFromBoolean(checked), Library.BRIGHTNESS_MODE_PATH);
+                                expBr.setChecked(false);
+                            }
+                        });
+                        dialog.show();
+
+                        dialog.findViewById(R.id.positive_button).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                expBrVerified = true;
+                                dialog.dismiss();
+                            }
+                        });
+
+                        dialog.findViewById(R.id.negative_button).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                dialog.cancel();
+                            }
+                        });
+
+                        new AsyncTask<Void, Integer, Void>() {
+                            TextView view1 = (TextView) dialog.findViewById(R.id.message);
+
+                            @Override
+                            protected Void doInBackground(Void... voids) {
+                                int i = 9;
+                                try {
+                                    while (dialog.isShowing() && !expBrVerified && i > 0) {
+                                        publishProgress(i--);
+                                        Thread.sleep(1000);
+                                    }
+
+                                } catch (Exception ignored) {
+                                    view1.setVisibility(View.GONE);
+                                }
+                                return null;
+                            }
+
+                            @Override
+                            protected void onProgressUpdate(Integer... values) {
+                                super.onProgressUpdate(values);
+                                view1.setText(String.format("Reverting to previous settings in %s seconds", values[0]));
+                            }
+
+                            @Override
+                            protected void onPostExecute(Void aVoid) {
+                                super.onPostExecute(aVoid);
+                                if (!expBrVerified)
+                                    dialog.cancel();
+                            }
+                        }.execute();
+
+                    }
+                }
+            });
 
         refreshAll();
 
@@ -582,16 +600,6 @@ public class GammaControlFragment extends Fragment {
                 setOnBootFile.exists() && setOnBootAgent.exists() &&
                         !setOnBootFile.isDirectory() && !setOnBootAgent.isDirectory()
         );
-
-        try {
-            expBr.setChecked(!MyTools.parseBoolFromString(MyTools.readFile(Library.BRIGHTNESS_MODE_PATH).trim()));
-        } catch (Exception e) {
-            try {
-                expBr.setVisibility(View.GONE);
-                expBr = null;
-            } catch (Exception ignored) {
-            }
-        }
 
     }
 
