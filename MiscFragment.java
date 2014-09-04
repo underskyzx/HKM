@@ -317,6 +317,12 @@ public class MiscFragment extends Fragment {
 
 
             MyTools.fillScript(setOnBootFile, values, destinations, "");
+            MyTools.completeScriptWith(setOnBootFile, new String[]
+                    {
+                            "setprop net.hostname " + ((EditText) view.findViewById(R.id.editText4)).getText().toString(),
+                            "setprop net.ipv4.tcp_congestion_control " + ((Spinner) view.findViewById(R.id.spinner0)).getSelectedItem().toString()
+
+                    });
             MyTools.createBootAgent(getActivity(), scriptsDir);
         } catch (Exception e) {
             File innerLog = new File(MyTools.getDataDir(getActivity()) + File.separator + "inner_log.log");
