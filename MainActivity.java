@@ -221,8 +221,9 @@ public class MainActivity extends FragmentActivity implements TabListener {
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         mDrawerList.setItemChecked(0, true);
         try {
-            if (!BatteryProfilesService.isRunning && getSharedPreferences("SharedPrefs", MODE_PRIVATE).getBoolean("Enable_Profiles_Service", false))
-                startService(new Intent(this, BatteryProfilesService.class));
+            if (!new File("/sys/kernel/msm_mpdecision").exists())
+                if (!BatteryProfilesService.isRunning && getSharedPreferences("SharedPrefs", MODE_PRIVATE).getBoolean("Enable_Profiles_Service", false))
+                    startService(new Intent(this, BatteryProfilesService.class));
         } catch (Exception e) {
         }
 
@@ -329,7 +330,10 @@ public class MainActivity extends FragmentActivity implements TabListener {
                 mDrawerLayout.closeDrawer(mDrawerList);
                 switch (i) {
                     case 7:
-                        activityDelayed(new Intent(getApplicationContext(), ProfilesActivity.class), delay);
+                        if (!new File("/sys/kernel/msm_mpdecision").exists())
+                            activityDelayed(new Intent(getApplicationContext(), ProfilesActivity.class), delay);
+                        else
+                            MyTools.toast(getApplicationContext(), "Not yet available for hellsCore b49 and up. Still WIP.");
                         break;
                     case 8:
                         activityDelayed(new Intent(getApplicationContext(), MonitoringActivity.class), delay);
