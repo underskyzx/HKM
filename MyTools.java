@@ -275,6 +275,23 @@ public class MyTools {
         });
     }
 
+    public static void completeScriptWith(File file, String[] lines) throws Exception {
+        if (!file.exists() || file.isDirectory())
+            file.createNewFile();
+
+        PrintWriter p = new PrintWriter(new FileWriter(file, true));
+        p.println("");
+
+        for (String line : lines)
+            p.println(line);
+
+        p.flush();
+        p.close();
+        MyTools.execTerminalCommand(new String[]{
+                "chmod 775 " + file.toString()
+        });
+    }
+
     public static void createBootAgent(final Context context, final File scriptsDir) throws Exception {
 
         new AsyncTask<Integer, Void, Boolean>() {
