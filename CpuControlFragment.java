@@ -131,6 +131,7 @@ public class CpuControlFragment extends Fragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             boostedCpusDisplay.setText("" + (which));
+                            boostedCpusDisplay.setContentDescription(which + "");
                         }
                     }
             );
@@ -767,7 +768,7 @@ public class CpuControlFragment extends Fragment {
         try {
             String str = MyTools.readFile(Library.BOOSTED_CPUS_PATH);
             boostedCpusDisplay.setText(str);
-            boostedCpusDisplay.setContentDescription(String.format("%s %s %s %s", str, str, str, str));
+            boostedCpusDisplay.setContentDescription(str);
             boostedCpusButton.setContentDescription(Library.BOOSTED_CPUS_PATH);
         } catch (Exception e) {
             try {
@@ -1027,7 +1028,7 @@ public class CpuControlFragment extends Fragment {
 
                     minCpusDisplay.getContentDescription().toString(),
                     maxCpusDisplay.getContentDescription().toString(),
-                    view.findViewById(R.id.switch_touchBoost).getContentDescription().toString(),
+                    view.findViewById(R.id.switch_touchBoost).getVisibility() == View.VISIBLE ? view.findViewById(R.id.switch_touchBoost).getContentDescription().toString() : null,
                     boostedCpusButton.getContentDescription().toString(),
                     suspendFreqDisplay.getContentDescription().toString(),
                     Library.SCREEN_OFF_MAX_STATE,
@@ -1119,6 +1120,7 @@ public class CpuControlFragment extends Fragment {
 
 
         } catch (Exception e) {
+            Log.d("TAG", e.toString());
             e.printStackTrace();
             if (f)
                 setOnBootFailed();
@@ -1128,17 +1130,22 @@ public class CpuControlFragment extends Fragment {
     }
 
     private void setOnBootFailed() {
-        final AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
-        b.setMessage(getString(R.string.toast_failed_setOnBoot));
-        b.setCancelable(false);
-        b.setPositiveButton(getString(R.string.button_ok), new DialogInterface.OnClickListener() {
+        MainActivity.instance.runOnUiThread(new Runnable() {
             @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                refreshAll();
+            public void run() {
+                final AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
+                b.setMessage(getString(R.string.toast_failed_setOnBoot));
+                b.setCancelable(false);
+                b.setPositiveButton(getString(R.string.button_ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        refreshAll();
+                    }
+                });
+                setOnBoot.setChecked(false);
+                b.show();
             }
         });
-        setOnBoot.setChecked(false);
-        b.show();
     }
 
 }
