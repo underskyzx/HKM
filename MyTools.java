@@ -98,6 +98,10 @@ public class MyTools {
         }
     }
 
+    public static String[] listElements(String fp, String delim) throws FileNotFoundException, IOException {
+        return readFile(fp).split(delim);
+    }
+
     public static String readFile(String fp) throws FileNotFoundException, IOException {
         File f = new File(fp);
         if (f.exists() && f.isFile()) {
