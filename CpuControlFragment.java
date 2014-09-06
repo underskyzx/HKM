@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,12 +33,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 
 import eu.chainfire.libsuperuser.Shell;
 
 public class CpuControlFragment extends Fragment {
 
     public static final String setOnBootFileName = "99hellscore_cpu_settings";
+    public static CpuControlFragment instance;
     private static byte firstRun = 1;
     private static int voltageSteps = 28;
     private static int voltageStepValue = 12500;
@@ -460,6 +461,7 @@ public class CpuControlFragment extends Fragment {
         super.onStart();
         //initialize();
         //refreshAll();
+        instance = this;
         if (firstRun == 1) {
             firstRun = 0;
             new AsyncTask<Void, Void, Boolean>() {
@@ -639,7 +641,16 @@ public class CpuControlFragment extends Fragment {
         String cbsc = boostedCpusDisplay.getContentDescription().toString();
         MyTools.write(cmnc, minCpusDisplay.getContentDescription().toString());
         MyTools.write(cmxc, maxCpusDisplay.getContentDescription().toString());
-        MyTools.write(cbsc, boostedCpusButton.getContentDescription().toString());
+        if (cbsc.contains("#")) {
+            Scanner s = new Scanner(cbsc);
+            String target = boostedCpusButton.getContentDescription().toString();
+            while (s.hasNextLine()) {
+                String value = s.nextLine().replaceAll("#", "");
+                MyTools.write(value, target);
+            }
+        } else {
+            MyTools.write(cbsc, boostedCpusButton.getContentDescription().toString());
+        }
 
         if (view.findViewById(R.id.switch_touchBoost).isEnabled()) {
             String boost_enabled = MyTools.parseIntFromBoolean(((Switch) view.findViewById(R.id.switch_touchBoost)).isChecked());
@@ -659,7 +670,6 @@ public class CpuControlFragment extends Fragment {
         }
 
         if (switch_scroff_single_core != null) {
-            Log.d("TAG", ">>" + switch_scroff_single_core.isChecked());
             MyTools.write(MyTools.parseIntFromBoolean(switch_scroff_single_core.isChecked()), Library.SCREEN_OFF_SINGLE_CORE_PATH);
         }
 
@@ -774,9 +784,10 @@ public class CpuControlFragment extends Fragment {
             try {
                 String boost_enabled = MyTools.readFile(Library.TOUCH_BOOST_PATH).trim();
                 ((Switch) view.findViewById(R.id.switch_touchBoost)).setChecked(boost_enabled.equals("1"));
-                String str = MyTools.readFile(Library.TOUCH_BOOST_FREQS_PATH);
-                boostedCpusDisplay.setText(scaleDown(str));
-                boostedCpusDisplay.setContentDescription(String.format("%s %s %s %s", str, str, str, str));
+
+                ArrayList<String> list = MyTools.catToList(Library.TOUCH_BOOST_FREQS_PATH);
+                updateBoostFreqs(list);
+
                 //switch to mode 2
                 boostedCpusButton.setContentDescription(Library.TOUCH_BOOST_FREQS_PATH);
                 view.findViewById(R.id.switch_touchBoost).setEnabled(true);
@@ -789,7 +800,7 @@ public class CpuControlFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
                         //TODO
-                        final AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+                        /*final AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
                         dialog
                                 .setTitle("Touch Boost")
                                 .setItems(AVAIL_FREQ, new DialogInterface.OnClickListener() {
@@ -800,7 +811,8 @@ public class CpuControlFragment extends Fragment {
                                         boostedCpusDisplay.setContentDescription(String.format("%s %s %s %s", str, str, str, str));
                                     }
                                 })
-                                .show();
+                                .show();*/
+                        startActivity(new Intent(getActivity(), BoostFreqsManager.class));
                     }
                 });
             } catch (Exception ignored) {
@@ -1120,7 +1132,6 @@ public class CpuControlFragment extends Fragment {
 
 
         } catch (Exception e) {
-            Log.d("TAG", e.toString());
             e.printStackTrace();
             if (f)
                 setOnBootFailed();
@@ -1146,6 +1157,21 @@ public class CpuControlFragment extends Fragment {
                 b.show();
             }
         });
+    }
+
+    public void updateBoostFreqs(ArrayList<String> values) throws IOException {
+        if (values.size() < 4) {
+            MyTools.toast(getActivity(), "Ex");
+            throw new IOException();
+        }
+
+        String s = "";
+        int c = 0;
+        for (String v : values)
+            s += c++ + " " + v + "#\n";
+
+        boostedCpusDisplay.setContentDescription(s);
+        boostedCpusDisplay.setText(values.toString());
     }
 
 }
