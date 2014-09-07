@@ -1144,6 +1144,7 @@ public class CpuControlFragment extends Fragment {
 
         } catch (Exception e) {
             e.printStackTrace();
+            MyTools.toast(getActivity(), e.toString());
             if (f)
                 setOnBootFailed();
             else

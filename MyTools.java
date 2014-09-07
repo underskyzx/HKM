@@ -200,7 +200,7 @@ public class MyTools {
             p.println("if [ \"$1\" != \"nodelay\" ]; then");
             p.println("sleep 3");
             p.println("fi");
-        } else if (flags.contains(":delay45:")) {
+        } else if (flags.contains(":delay45:")) { //Exit, to be launched on boot by OnBootService
             p.println("if [ \"$1\" != \"nodelay\" ]; then");
             p.println("echo `date +%T` -- " + file.getName() + " delayed >> /sdcard/HKM.log");
             p.println("exit 0");
