@@ -995,7 +995,7 @@ public class CpuControlFragment extends Fragment {
                     minCpusDisplay.getText().toString(),
                     maxCpusDisplay.getText().toString(),
                     MyTools.parseIntFromBoolean(((Switch) view.findViewById(R.id.switch_touchBoost)).isChecked()),
-                    boostedCpusDisplay.getContentDescription().toString(),
+                    boostedCpusDisplay.getContentDescription().toString().contains("#") ? null : boostedCpusDisplay.getContentDescription().toString(),
                     tmpSusf,
                     tmpSoffMax1,
                     tmpSoffMax2,
@@ -1097,6 +1097,17 @@ public class CpuControlFragment extends Fragment {
                 if (print.contains(":")) {
                     vals.add(print.split(":")[0] + " " + print.split(":")[1]);
                 }
+
+            if (boostedCpusDisplay.getContentDescription().toString().contains("#")) {
+                Scanner s = new Scanner(boostedCpusDisplay.getContentDescription().toString());
+                String[] lines = new String[4];
+                int c = 0;
+                while (s.hasNextLine()) {
+                    lines[c] = String.format("echo %s > %s", s.nextLine().replace("#", ""), Library.TOUCH_BOOST_FREQS_PATH);
+                    c++;
+                }
+                MyTools.completeScriptWith(file, lines);
+            }
 
             MyTools.completeScriptWith(file, vals, new String[]{Library.VDD_LEVELS});
 
