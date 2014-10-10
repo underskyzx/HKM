@@ -3,8 +3,10 @@ package com.themike10452.hellscorekernelmanager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -30,8 +32,6 @@ import java.util.ArrayList;
 
 public class InfoTabFragment extends Fragment {
 
-    private static String dataDir;
-
     public InfoTabFragment() {
     }
 
@@ -39,7 +39,7 @@ public class InfoTabFragment extends Fragment {
 
         File listFile = new File(Environment.getExternalStorageDirectory().getPath() + File.separator + Library.hellscore_update_file);
         try {
-            ArrayList<String> content = MyTools.catToList(listFile.toString());
+            ArrayList<String> content = MyTools.readToList(listFile.toString());
             listFile.delete();
             ArrayList<String> StableNames = new ArrayList<String>();
             ArrayList<String> StableLinks = new ArrayList<String>();
@@ -149,13 +149,7 @@ public class InfoTabFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        dataDir = MyTools.getDataDir(getActivity());
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_info_tab, container, false);
         setHasOptionsMenu(true);
         TextView appVersion = (TextView) (view != null ? view.findViewById(R.id.title2) : null);
@@ -163,7 +157,7 @@ public class InfoTabFragment extends Fragment {
         appVersion.setText(MainActivity.appVersion);
         assert view != null;
         TextView kernelVersion = (TextView) view.findViewById(R.id.textView3);
-        kernelVersion.setText(MyTools.readFile("/proc/version", "n/a"));
+        kernelVersion.setText(MyTools.getFormattedKernelVersion());
         final WebView browser = (WebView) view.findViewById(R.id.webView);
         browser.setVisibility(View.GONE);
         WebSettings webSettings = browser.getSettings();
@@ -221,7 +215,30 @@ public class InfoTabFragment extends Fragment {
                                         null)
                                 .build()
                 );
-                downloadFile(getActivity(), false, "mode1");
+                //downloadFile(getActivity(), false, "mode1");
+
+                PackageManager manager = getActivity().getPackageManager();
+                String packageName = "lb.themike10452.hellscorekernelupdater";
+
+                Intent intent = manager.getLaunchIntentForPackage(packageName);
+
+                if (intent != null) {
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    startActivity(intent);
+                } else {
+                    try {
+                        intent = manager.getLaunchIntentForPackage("com.android.vending");
+                        ComponentName comp = new ComponentName("com.android.vending", "com.google.android.finsky.activities.LaunchUrlHandlerActivity"); // package name and activity
+                        intent.setComponent(comp);
+                        intent.setData(Uri.parse("market://details?id=" + packageName));
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packageName));
+                        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                        startActivity(intent);
+                    }
+                }
+
             }
         });
 

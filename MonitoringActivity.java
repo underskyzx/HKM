@@ -1,16 +1,23 @@
 package com.themike10452.hellscorekernelmanager;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by Mike on 4/12/2014.
@@ -19,8 +26,7 @@ public class MonitoringActivity extends Activity {
 
     public static boolean inForground;
     private String[][] battery_info, cpu_info;
-    private String TIS;
-    private List<String> time_in_state;
+    private ArrayList<String> time_in_state;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -69,7 +75,6 @@ public class MonitoringActivity extends Activity {
                         Library.CPU_TEMP_PATH, "n/a"
                 }
         };
-        TIS = Library.CPU_SYSFS + "/cpu0/cpufreq/statis/time_in_state";
     }
 
     @Override
@@ -113,7 +118,6 @@ public class MonitoringActivity extends Activity {
                     for (byte b1 = 1; b1 < cpu_info[3].length; b1++) {
                         cpu_info[3][b1] = MyTools.catInt(String.format(cpu_info[3][0], b1 - 1), -21) + "";
                     }
-                    time_in_state = MyTools.suCatToList(TIS);
                     publishProgress();
                 }
                 return null;
@@ -192,7 +196,118 @@ public class MonitoringActivity extends Activity {
                     ((TextView) findViewById(R.id.cpu3_freq_display)).setText(cpu_info[3][4]);
                 }
 
+                LinearLayout tis = (LinearLayout) findViewById(R.id.time_in_state);
+                time_in_state = MyTools.readToList(Library.CPU_TIME_IN_STATE);
+                time_in_state.add(0, "Sleep " + (SystemClock.elapsedRealtime() - SystemClock.uptimeMillis()) / 10);
+                tis.removeAllViews();
+                TimeInStateAdapter adapter = new TimeInStateAdapter(getApplicationContext(), R.layout.time_in_state_layout, time_in_state);
+                for (int i = 0; i < time_in_state.size(); i++) {
+                    tis.addView(adapter.getView(i, null, null));
+                }
+
             }
         }.execute();
     }
+}
+
+class State {
+    public int time;
+    public String freq;
+
+    public State(String entry) {
+        freq = entry.split(" ")[0];
+        time = Integer.parseInt(entry.split(" ")[1]);
+    }
+}
+
+class TimeInStateAdapter extends ArrayAdapter<String> {
+
+    public long sum;
+    private ArrayList<String> stats;
+    private Context context;
+
+    public TimeInStateAdapter(Context context, int resource, ArrayList<String> objects) {
+        super(context, resource, objects);
+        this.context = context;
+        stats = objects;
+        sum = 0;
+        for (String str : objects) {
+            sum += new State(str).time;
+        }
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        if (convertView == null)
+            convertView = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.time_in_state_layout, null);
+
+        State state = new State(stats.get(position++));
+
+        TextView freq = (TextView) convertView.findViewById(R.id.freqDisplay);
+        TextView perc = (TextView) convertView.findViewById(R.id.perc);
+        TextView time = (TextView) convertView.findViewById(R.id.time);
+        ProgressBar bar = (ProgressBar) convertView.findViewById(R.id.progressBar);
+
+        freq.setText(state.freq);
+
+        int i = (int) ((state.time * 100) / sum);
+
+        perc.setText(i + "%");
+
+        time.setText(format(state.time / 100));
+        //time.setText(state.time + "");
+
+        bar.setMax(100);
+        bar.setProgress(i);
+
+        return convertView;
+    }
+
+    private String format(long t) {
+        String format = "%s:%s:%s";
+        int s = 0, m = 0, h = 0;
+        long i = t;
+        while ((i -= 3600) >= 60) {
+            h++;
+        }
+        i = t - (h * 3600);
+        while ((i -= 60) >= 0) {
+            m++;
+        }
+        i = t - (h * 3600) - (m * 60);
+        while ((i--) >= 0) {
+            s++;
+        }
+
+        if (s < 10) {
+            if (m < 10) {
+                if (h < 10) {
+                    return String.format(format, "0" + h, "0" + m, "0" + s);
+                } else {
+                    return String.format(format, h, "0" + m, "0" + "0" + s);
+                }
+            } else {
+                if (h < 10) {
+                    return String.format(format, "0" + h, m, "0" + s);
+                } else {
+                    return String.format(format, h, m, "0" + s);
+                }
+            }
+        } else {
+            if (m < 10) {
+                if (h < 10) {
+                    return String.format(format, "0" + h, "0" + m, s);
+                } else {
+                    return String.format(format, h, "0" + m, s);
+                }
+            } else {
+                if (h < 10) {
+                    return String.format(format, "0" + h, m, s);
+                } else {
+                    return String.format(format, h, m, s);
+                }
+            }
+        }
+    }
+
 }

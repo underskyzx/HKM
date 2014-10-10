@@ -18,9 +18,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import eu.chainfire.libsuperuser.Shell;
 
@@ -148,7 +151,7 @@ public class MyTools {
         }
     }
 
-    public static ArrayList<String> catToList(String file) {
+    public static ArrayList<String> readToList(String file) {
         ArrayList<String> list = new ArrayList<String>();
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
@@ -164,8 +167,49 @@ public class MyTools {
         return list;
     }
 
-    public static List<String> suCatToList(String file) {
-        return Shell.SU.run("cat " + file);
+    public static List<String> catToList(String file) {
+        List<String> list = new ArrayList<String>();
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(Runtime.getRuntime().exec("cat " + file).getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                list.add(line);
+            }
+            return list;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public static String getFormattedKernelVersion() {
+        String procVersionStr;
+
+        try {
+            procVersionStr = new BufferedReader(new FileReader(new File("/proc/version"))).readLine();
+
+            final String PROC_VERSION_REGEX =
+                    "Linux version (\\S+) " +
+                            "\\((\\S+?)\\) " +
+                            "(?:\\(gcc.+? \\)) " +
+                            "(#\\d+) " +
+                            "(?:.*?)?" +
+                            "((Sun|Mon|Tue|Wed|Thu|Fri|Sat).+)";
+
+            Pattern p = Pattern.compile(PROC_VERSION_REGEX);
+            Matcher m = p.matcher(procVersionStr);
+
+            if (!m.matches()) {
+                return "Unavailable";
+            } else if (m.groupCount() < 4) {
+                return "Unavailable";
+            } else {
+                return (new StringBuilder(m.group(1)).append("\n").append(
+                        m.group(2)).append(" ").append(m.group(3)).append("\n")
+                        .append(m.group(4))).toString();
+            }
+        } catch (IOException e) {
+            return "Unavailable";
+        }
     }
 
     public static String getDataDir(Context context) {

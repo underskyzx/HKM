@@ -785,7 +785,7 @@ public class CpuControlFragment extends Fragment {
                 String boost_enabled = MyTools.readFile(Library.TOUCH_BOOST_PATH).trim();
                 ((Switch) view.findViewById(R.id.switch_touchBoost)).setChecked(boost_enabled.equals("1"));
 
-                ArrayList<String> list = MyTools.catToList(Library.TOUCH_BOOST_FREQS_PATH);
+                ArrayList<String> list = MyTools.readToList(Library.TOUCH_BOOST_FREQS_PATH);
                 updateBoostFreqs(list);
 
                 //switch to mode 2
@@ -926,7 +926,7 @@ public class CpuControlFragment extends Fragment {
     }
 
     private void init_Voltages() {
-        vdd_list = MyTools.catToList(Library.VDD_LEVELS);
+        vdd_list = MyTools.readToList(Library.VDD_LEVELS);
 
         if (!vdd_list.get(0).equals("ladyGaga")) {
 

@@ -196,10 +196,9 @@ public class MiscFragment extends Fragment {
         }
 
         try {
-            String s = Shell.SH.run("sysctl net.ipv4.tcp_allowed_congestion_control").get(0);
-            String sx = Shell.SH.run("getprop net.ipv4.tcp_congestion_control").get(0);
-            String[] tab = s.split("=");
-            tab = tab[1].trim().split(" ");
+            String s = MyTools.readFile(Library.NET_TCP_ALLOWED);
+            String sx = MyTools.readFile(Library.NET_TCP_CONGST);
+            String[] tab = s.trim().split(" ");
             spinner2.setAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, tab));
             spinner2.setSelection(indexOf(tab, sx));
         } catch (Exception ignored) {
