@@ -31,7 +31,7 @@ import java.util.ArrayList;
 public class GammaControlFragment extends Fragment {
 
     public static final String setOnBootFileName = "90hellscore_color_settings";
-    private static boolean expBrVerified;
+    private static boolean expBrVerified = true;
     private final ArrayList<String> toRemove = new ArrayList<String>();
     private String redCal;
     private String greenCal;
@@ -151,7 +151,6 @@ public class GammaControlFragment extends Fragment {
                 public void onCheckedChanged(CompoundButton compoundButton, final boolean checked) {
                     String s = MyTools.parseIntFromBoolean(!checked);
                     MyTools.write(s, Library.BRIGHTNESS_MODE_PATH);
-                    //TODO
                     if (checked) {
                         expBrVerified = false;
                         final Dialog dialog = new Dialog(getActivity());
@@ -641,6 +640,7 @@ public class GammaControlFragment extends Fragment {
                 };
 
                 MyTools.fillScript(setOnBootFile, values, destinations, "");
+                MyTools.completeScriptWith(setOnBootFile, new String[]{String.format("echo %s > %s", MyTools.parseIntFromBoolean(!expBr.isChecked()), Library.BRIGHTNESS_MODE_PATH)});
                 MyTools.createBootAgent(getActivity(), scriptsDir);
 
             } catch (Exception e) {
