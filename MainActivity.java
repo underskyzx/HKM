@@ -1,33 +1,31 @@
 package com.themike10452.hellscorekernelmanager;
 
 import android.app.ActionBar;
-import android.app.ActionBar.Tab;
-import android.app.ActionBar.TabListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.FragmentTransaction;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.themike10452.hellscorekernelmanager.Blackbox.Library;
@@ -35,38 +33,66 @@ import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 import java.io.File;
 
 
-public class MainActivity extends FragmentActivity implements TabListener {
+public class MainActivity extends FragmentActivity {
 
     public static MainActivity instance;
 
     public static String appVersion;
-    private int counter = 0;
 
-    private String[] drawerItems;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ViewPager.OnPageChangeListener ChangeListener = new ViewPager.OnPageChangeListener() {
         @Override
         public void onPageSelected(int arg0) {
-            counter = 0;
             if (mDrawerList != null)
                 mDrawerList.setItemChecked(arg0, true);
-            actionBar.setSelectedNavigationItem(arg0);
+
+            ActionBar actionBar = getActionBar();
+
+            switch (arg0) {
+                case 0:
+                    if (actionBar != null)
+                        actionBar.setTitle(getString(R.string.cpuTab));
+                    break;
+                case 1:
+                    if (actionBar != null)
+                        actionBar.setTitle(getString(R.string.gpuTab));
+                    break;
+                case 2:
+                    if (actionBar != null)
+                        actionBar.setTitle(getString(R.string.miscTab));
+                    break;
+                case 3:
+                    if (actionBar != null)
+                        actionBar.setTitle(getString(R.string.gammaTab));
+                    break;
+                case 4:
+                    if (actionBar != null)
+                        actionBar.setTitle(getString(R.string.touchControl));
+                    break;
+                case 5:
+                    if (actionBar != null)
+                        actionBar.setTitle(getString(R.string.soundTab));
+                    break;
+                case 6:
+                    if (actionBar != null)
+                        actionBar.setTitle(getString(R.string.infoTab));
+            }
+
         }
 
         @Override
         public void onPageScrolled(int arg0, float arg1, int arg2) {
-            counter = 0;
+
         }
 
         @Override
         public void onPageScrollStateChanged(int arg0) {
-            counter = 0;
+
         }
     };
     private ActionBarDrawerToggle drawerToggle;
     private DBHelper dbH;
-    private ActionBar actionBar;
     private ViewPager viewPager;
 
     private static boolean DatabaseExists(ContextWrapper context, String dbName) {
@@ -104,10 +130,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (drawerToggle.onOptionsItemSelected(item))
-            return true;
-        else
-            return super.onOptionsItemSelected(item);
+        return drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -148,56 +171,25 @@ public class MainActivity extends FragmentActivity implements TabListener {
         }
 
         viewPager = (ViewPager) findViewById(R.id.pager);
-        Adapter mAdapter = new Adapter(getSupportFragmentManager());
+        PagerAdapter mAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(mAdapter);
         viewPager.setOnPageChangeListener(ChangeListener);
-        actionBar = getActionBar();
+        ActionBar actionBar = getActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                actionBar.setElevation(1);
         }
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        ActionBar.Tab cpuControlTab = actionBar.newTab();
-        ActionBar.Tab touchControlTab = actionBar.newTab();
-        ActionBar.Tab gammaControlTab = actionBar.newTab();
-        ActionBar.Tab gpuControlTab = actionBar.newTab();
-        ActionBar.Tab miscTab = actionBar.newTab();
-        ActionBar.Tab soundControlTab = actionBar.newTab();
-        ActionBar.Tab infoTab = actionBar.newTab();
-
-        cpuControlTab.setText(R.string.cpuTab);
-        gpuControlTab.setText(R.string.gpuTab);
-        touchControlTab.setText(R.string.touchControl);
-        gammaControlTab.setText(R.string.gammaTab);
-        miscTab.setText(R.string.miscTab);
-        soundControlTab.setText(R.string.soundTab);
-        infoTab.setText(R.string.infoTab);
-
-        cpuControlTab.setTabListener(this);
-        touchControlTab.setTabListener(this);
-        gammaControlTab.setTabListener(this);
-        gpuControlTab.setTabListener(this);
-        miscTab.setTabListener(this);
-        soundControlTab.setTabListener(this);
-        infoTab.setTabListener(this);
-
-        actionBar.addTab(cpuControlTab);
-        actionBar.addTab(gpuControlTab);
-        actionBar.addTab(miscTab);
-        actionBar.addTab(gammaControlTab);
-        actionBar.addTab(touchControlTab);
-        actionBar.addTab(soundControlTab);
-        actionBar.addTab(infoTab);
-
-        drawerItems = new String[]{
-                getString(R.string.cpuTab),
-                getString(R.string.gpuTab),
-                getString(R.string.miscTab),
-                getString(R.string.gammaTab),
-                getString(R.string.touchControl),
-                getString(R.string.soundTab),
-                getString(R.string.infoTab),
+        String[] drawerItems = new String[]{
+                getString(R.string.cpuTab).toUpperCase(),
+                getString(R.string.gpuTab).toUpperCase(),
+                getString(R.string.miscTab).toUpperCase(),
+                getString(R.string.gammaTab).toUpperCase(),
+                getString(R.string.touchControl).toUpperCase(),
+                getString(R.string.soundTab).toUpperCase(),
+                getString(R.string.infoTab).toUpperCase(),
                 getString(R.string.title_activity_profiles).toUpperCase(),
                 getString(R.string.title_activity_monitoring).toUpperCase()
         };
@@ -206,7 +198,6 @@ public class MainActivity extends FragmentActivity implements TabListener {
         drawerToggle = new ActionBarDrawerToggle(
                 this,
                 mDrawerLayout,
-                R.drawable.apptheme_ic_navigation_drawer,
                 R.string.app_name,
                 R.string.app_name
         );
@@ -224,7 +215,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
             if (!new File("/sys/kernel/msm_mpdecision").exists())
                 if (!BatteryProfilesService.isRunning && getSharedPreferences("SharedPrefs", MODE_PRIVATE).getBoolean("Enable_Profiles_Service", false))
                     startService(new Intent(this, BatteryProfilesService.class));
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
     }
@@ -233,40 +224,6 @@ public class MainActivity extends FragmentActivity implements TabListener {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         drawerToggle.syncState();
-    }
-
-    @Override
-    public void onTabReselected(Tab arg0, FragmentTransaction arg1) {
-        counter++;
-        if (counter == 2) {
-            counter = 0;
-            final Dialog dialog = new Dialog(this);
-            dialog.setTitle(getString(R.string.title_about));
-            dialog.setContentView(R.layout.about_dialog);
-            TextView version = (TextView) dialog.findViewById(R.id.misc);
-
-            try {
-                appVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-                version.setText("v " + appVersion);
-            } catch (Exception ignored) {
-            }
-
-            dialog.show();
-        }
-    }
-
-    @Override
-    public void onTabSelected(Tab arg0, FragmentTransaction arg1) {
-        counter = 0;
-        if (mDrawerList != null)
-            mDrawerList.setItemChecked(arg0.getPosition(), true);
-        if (mDrawerLayout != null)
-            mDrawerLayout.closeDrawer(mDrawerList);
-        viewPager.setCurrentItem(arg0.getPosition(), true);
-    }
-
-    @Override
-    public void onTabUnselected(Tab arg0, FragmentTransaction arg1) {
     }
 
     @Override
@@ -333,7 +290,7 @@ public class MainActivity extends FragmentActivity implements TabListener {
                         if (!new File("/sys/kernel/msm_mpdecision").exists())
                             activityDelayed(new Intent(getApplicationContext(), ProfilesActivity.class), delay);
                         else
-                            MyTools.toast(getApplicationContext(), "Not yet available for hellsCore b49 and up. Still WIP.");
+                            MyTools.toast(getApplicationContext(), "Not available for hellsCore b49 and up.");
                         break;
                     case 8:
                         activityDelayed(new Intent(getApplicationContext(), MonitoringActivity.class), delay);
@@ -346,9 +303,9 @@ public class MainActivity extends FragmentActivity implements TabListener {
 
 }
 
-class Adapter extends FragmentStatePagerAdapter {
+class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
 
-    public Adapter(FragmentManager fm) {
+    public ScreenSlidePagerAdapter(FragmentManager fm) {
         super(fm);
     }
 

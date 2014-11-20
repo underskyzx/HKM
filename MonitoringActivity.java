@@ -51,7 +51,6 @@ public class MonitoringActivity extends Activity {
         try {
             getActionBar().setHomeButtonEnabled(true);
             getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.button_color));
         } catch (Exception ingnored) {
         }
         battery_info = new String[][]{

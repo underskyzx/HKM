@@ -39,16 +39,15 @@ public class MiscFragment extends Fragment {
     private Switch dynFsyncSwitch, fastChargeSwitch;
     private CheckBox setOnBoot;
     private String[] AVAIL_SCHED;
+    private String AVAILABLE_TCP_SCHEDS;
     private File setOnBootAgent, setOnBootFile, scriptsDir;
 
     public MiscFragment() {
 
     }
 
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         view = inflater.inflate(R.layout.fragment_misc, container, false);
         setHasOptionsMenu(true);
@@ -75,11 +74,13 @@ public class MiscFragment extends Fragment {
         } catch (Exception e) {
             tmp = new StringBuffer("n/a");
         }
+        try {
+            String s = new String(tmp.deleteCharAt(tmp.indexOf("[")).deleteCharAt(tmp.indexOf("]")));
 
-        String s = new String(tmp.deleteCharAt(tmp.indexOf("[")).deleteCharAt(tmp.indexOf("]")));
-
-        AVAIL_SCHED = s.split(" ");
-
+            AVAIL_SCHED = s.split(" ");
+        } catch (Exception e1) {
+            AVAIL_SCHED = new String[]{"null"};
+        }
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, AVAIL_SCHED);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -196,10 +197,10 @@ public class MiscFragment extends Fragment {
         }
 
         try {
-            String s = MyTools.readFile(Library.NET_TCP_ALLOWED);
+            AVAILABLE_TCP_SCHEDS = MyTools.readFile(Library.NET_TCP_AVAILABLE);
             String sx = MyTools.readFile(Library.NET_TCP_CONGST);
-            String[] tab = s.trim().split(" ");
-            spinner2.setAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, tab));
+            String[] tab = AVAILABLE_TCP_SCHEDS.trim().split(" ");
+            spinner2.setAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, tab));
             spinner2.setSelection(indexOf(tab, sx));
         } catch (Exception ignored) {
         } catch (Error ignored) {
@@ -274,9 +275,10 @@ public class MiscFragment extends Fragment {
 
             MyTools.execTerminalCommand(new String[]
                             {
+                                    String.format("echo %s > %s", AVAILABLE_TCP_SCHEDS, Library.NET_TCP_ALLOWED),
+                                    String.format("echo %s > %s", ((Spinner) view.findViewById(R.id.spinner0)).getSelectedItem().toString(), Library.NET_TCP_CONGST),
                                     "setprop net.hostname " + ((EditText) view.findViewById(R.id.editText4)).getText().toString(),
                                     "setprop net.ipv4.tcp_congestion_control " + ((Spinner) view.findViewById(R.id.spinner0)).getSelectedItem().toString()
-
                             }
             );
 
@@ -318,6 +320,8 @@ public class MiscFragment extends Fragment {
             MyTools.fillScript(setOnBootFile, values, destinations, "");
             MyTools.completeScriptWith(setOnBootFile, new String[]
                     {
+                            String.format("echo %s > %s", AVAILABLE_TCP_SCHEDS, Library.NET_TCP_ALLOWED),
+                            String.format("echo %s > %s", ((Spinner) view.findViewById(R.id.spinner0)).getSelectedItem().toString(), Library.NET_TCP_CONGST),
                             "setprop net.hostname " + ((EditText) view.findViewById(R.id.editText4)).getText().toString(),
                             "setprop net.ipv4.tcp_congestion_control " + ((Spinner) view.findViewById(R.id.spinner0)).getSelectedItem().toString()
 

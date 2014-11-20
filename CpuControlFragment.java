@@ -799,19 +799,6 @@ public class CpuControlFragment extends Fragment {
                 boostedCpusButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        //TODO
-                        /*final AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
-                        dialog
-                                .setTitle("Touch Boost")
-                                .setItems(AVAIL_FREQ, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        String str = AVAIL_FREQ[i];
-                                        boostedCpusDisplay.setText(scaleDown(str));
-                                        boostedCpusDisplay.setContentDescription(String.format("%s %s %s %s", str, str, str, str));
-                                    }
-                                })
-                                .show();*/
                         startActivity(new Intent(getActivity(), BoostFreqsManager.class));
                     }
                 });

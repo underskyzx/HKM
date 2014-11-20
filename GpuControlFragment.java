@@ -63,13 +63,11 @@ public class GpuControlFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_gpu_control,
                 container, false);
         setHasOptionsMenu(true);
 
-        //TODO mode 2
         if (new File("/sys/kernel/msm_mpdecision").exists())
             Library.gpu_governors = Library.gpu_governors_new;
 

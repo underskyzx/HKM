@@ -1,5 +1,5 @@
 package com.themike10452.hellscorekernelmanager;
-
+/*
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -336,3 +336,4 @@ public class fileDownloader extends AsyncTask<String, Integer, Boolean> {
         }
     }
 }
+*/

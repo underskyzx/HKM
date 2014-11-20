@@ -1,15 +1,11 @@
 package com.themike10452.hellscorekernelmanager;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,7 +13,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
@@ -27,15 +22,12 @@ import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
-import java.io.File;
-import java.util.ArrayList;
-
 public class InfoTabFragment extends Fragment {
 
     public InfoTabFragment() {
     }
 
-    public static void postUpdates(final Activity activity) {
+    /*public static void postUpdates(final Activity activity) {
 
         File listFile = new File(Environment.getExternalStorageDirectory().getPath() + File.separator + Library.hellscore_update_file);
         try {
@@ -118,7 +110,7 @@ public class InfoTabFragment extends Fragment {
 
     public static void downloadFile(Activity activity, boolean force, String... args) {
         new fileDownloader(activity, force, args[0]).execute(args);
-    }
+    }*/
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -152,6 +144,7 @@ public class InfoTabFragment extends Fragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_info_tab, container, false);
         setHasOptionsMenu(true);
+
         TextView appVersion = (TextView) (view != null ? view.findViewById(R.id.title2) : null);
         assert appVersion != null;
         appVersion.setText(MainActivity.appVersion);
@@ -233,9 +226,14 @@ public class InfoTabFragment extends Fragment {
                         intent.setData(Uri.parse("market://details?id=" + packageName));
                         startActivity(intent);
                     } catch (Exception e) {
-                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packageName));
-                        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                        startActivity(intent);
+                        try {
+                            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packageName));
+                            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                            startActivity(intent);
+                        } catch (Exception e2) {
+                            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + packageName));
+                            startActivity(intent);
+                        }
                     }
                 }
 

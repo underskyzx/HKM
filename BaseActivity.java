@@ -2,10 +2,13 @@ package com.themike10452.hellscorekernelmanager;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -42,30 +45,34 @@ public class BaseActivity extends Activity {
             kernel = "n/a";
         }
         if (kernel.toLowerCase().contains("hells") || Blackbox.tool4(getApplicationContext())) {
-            final SharedPreferences preferences = getSharedPreferences("SharedPrefs", MODE_PRIVATE);
-            boolean b = preferences.getBoolean("ShowRatingDisclaimer", true);
+            boolean b;
+            try {
+                b = MyTools.readFile("/sys/fs/selinux/enforce").equals("1") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+            } catch (Throwable ignored) {
+                b = false;
+            }
             if (b) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setPositiveButton("Take me to PlayStore", new DialogInterface.OnClickListener() {
+                Dialog d = builder.setPositiveButton("Take me to PlayStore", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(Uri.parse("market://details?id=com.themike10452.hellscorekernelmanager"));
+                        intent.setData(Uri.parse("market://details?id=com.mrbimc.selinux"));
                         startActivity(intent);
-                        preferences.edit().putBoolean("ShowRatingDisclaimer", false).commit();
+                        finish();
                     }
                 })
-                        .setNeutralButton("My rating is fine", new DialogInterface.OnClickListener() {
+                        .setNeutralButton("Continue", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                preferences.edit().putBoolean("ShowRatingDisclaimer", false).commit();
                                 load();
                             }
                         })
                         .setCancelable(false)
-                        .setTitle("PlayStore Ratings")
-                        .setMessage("This is a direct message to all who gave a bad app rating long ago and forgot to update their ratings after updating and improving the app. Please go ahead and fix your ratings.\n\nThe same goes to all of you who gave bad ratings simply because you miss one small feature, this is a discouragement and unappreciation to my work and efforts to provide you this free app, so go ahead and rethink your ratings.\n\nThe App will be pulled from PS and back to XDA because of these unjustified bad ratings.\n\nNote: I am not the kernel developer, I just created the support app.")
+                        .setTitle("SELinux Enforcing")
+                        .setMessage("If SELinux is set to permissive mode, there is relatively little to worry about, but when it is set to enforcing, the part of your app running as root may run into all sorts of unexpected restrictions.\n\n-- Chainfire\n\nPlease install SELinux Mode Changer from PlayStore to change SELinux mode to permissive, otherwise this app (and others) will misbehave.")
                         .show();
+                ((TextView) d.findViewById(android.R.id.message)).setTextSize(16);
             } else {
                 load();
             }
@@ -88,7 +95,32 @@ public class BaseActivity extends Activity {
                                             null)
                                     .build()
                     );
-                    InfoTabFragment.downloadFile(activity, true, "mode1");
+                    PackageManager manager = getPackageManager();
+                    String packageName = "lb.themike10452.hellscorekernelupdater";
+
+                    Intent intent = manager.getLaunchIntentForPackage(packageName);
+
+                    if (intent != null) {
+                        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                        startActivity(intent);
+                    } else {
+                        try {
+                            intent = manager.getLaunchIntentForPackage("com.android.vending");
+                            ComponentName comp = new ComponentName("com.android.vending", "com.google.android.finsky.activities.LaunchUrlHandlerActivity"); // package name and activity
+                            intent.setComponent(comp);
+                            intent.setData(Uri.parse("market://details?id=" + packageName));
+                            startActivity(intent);
+                        } catch (Exception e) {
+                            try {
+                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packageName));
+                                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                                startActivity(intent);
+                            } catch (Exception e2) {
+                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + packageName));
+                                startActivity(intent);
+                            }
+                        }
+                    }
                 }
             });
         }

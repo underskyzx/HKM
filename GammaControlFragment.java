@@ -99,6 +99,7 @@ public class GammaControlFragment extends Fragment {
             MyTools.write("1", Library.BRIGHTNESS_MODE_PATH);
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
