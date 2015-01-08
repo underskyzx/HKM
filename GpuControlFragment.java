@@ -110,7 +110,7 @@ public class GpuControlFragment extends Fragment {
                                           boolean fromUser) {
                 String gpu_max_clk;
                 try {
-                    gpu_max_clk = MyTools.readFile(Library.MAX_GPUCLK_PATH);
+                    gpu_max_clk = MyTools.readFile(Library.GPU_MAX_CLK_PATH);
                 } catch (Exception e) {
                     MyTools.longToast(getActivity(), "gpu_max_clk" + e.toString());
                     gpu_max_clk = "n/a";
@@ -150,7 +150,7 @@ public class GpuControlFragment extends Fragment {
         seekBar.setMax(FREQ.size() - 1);
         String gpu_max_clk;
         try {
-            gpu_max_clk = MyTools.readFile(Library.MAX_GPUCLK_PATH);
+            gpu_max_clk = MyTools.readFile(Library.GPU_MAX_CLK_PATH);
         } catch (Exception e) {
             MyTools.longToast(getActivity(), "gpu_max_clk: " + e.toString());
             gpu_max_clk = "n/a";
@@ -183,7 +183,7 @@ public class GpuControlFragment extends Fragment {
         }
         String mxc = scaleUp(maxClkDisplay.getText().toString());
         if (!mxc.equals("zoro"))
-            MyTools.write(mxc, Library.MAX_GPUCLK_PATH);
+            MyTools.write(mxc, Library.GPU_MAX_CLK_PATH);
 
         MyTools.toast(getActivity(), R.string.toast_done_succ);
     }
@@ -227,7 +227,7 @@ public class GpuControlFragment extends Fragment {
 
                     destinations = new String[]{
                             Library.GPU_POLICY_PATH,
-                            Library.MAX_GPUCLK_PATH
+                            Library.GPU_MAX_CLK_PATH
                     };
                     break;
                 default:
@@ -239,7 +239,7 @@ public class GpuControlFragment extends Fragment {
                     destinations = new String[]{
                             Library.GPU_POLICY_PATH,
                             Library.GPU_GOV_PATH,
-                            Library.MAX_GPUCLK_PATH
+                            Library.GPU_MAX_CLK_PATH
                     };
             }
 

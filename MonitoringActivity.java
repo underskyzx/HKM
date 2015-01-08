@@ -1,6 +1,7 @@
 package com.themike10452.hellscorekernelmanager;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -48,11 +49,12 @@ public class MonitoringActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monitor);
-        try {
-            getActionBar().setHomeButtonEnabled(true);
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-        } catch (Exception ingnored) {
-        }
+        if (getActionBar() != null)
+            try {
+                getActionBar().setHomeButtonEnabled(true);
+                getActionBar().setDisplayHomeAsUpEnabled(true);
+            } catch (Exception ignored) {
+            }
         battery_info = new String[][]{
                 {Library.BATTERY_SYSFS + "/temp", "n/a"},
                 {Library.BATTERY_SYSFS + "/health", "n/a"}
@@ -92,8 +94,30 @@ public class MonitoringActivity extends Activity {
     private void update() {
         new AsyncTask<Void, Void, Void>() {
 
+            private ProgressDialog dialog;
+
+            @Override
+
+            protected void onPreExecute() {
+                super.onPreExecute();
+                dialog = new ProgressDialog(MonitoringActivity.this);
+                dialog.setCancelable(false);
+                dialog.setIndeterminate(true);
+                dialog.setMessage("Do not touch the screen");
+                dialog.show();
+            }
+
             @Override
             protected Void doInBackground(Void... voids) {
+
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ignored) {
+                } finally {
+                    if (dialog != null && dialog.isShowing())
+                        dialog.dismiss();
+                }
+
                 int x = MyTools.catInt(Library.MSM_THERMAL_PATH, -1);
                 if (x != -1)
                     ((ProgressBar) findViewById(R.id.cpu_temp_progress)).setMax(x);
@@ -107,10 +131,6 @@ public class MonitoringActivity extends Activity {
                 }
 
                 while (inForground) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ignored) {
-                    }
                     battery_info[0][1] = MyTools.readFile(battery_info[0][0], "n/a");
                     battery_info[1][1] = MyTools.readFile(battery_info[1][0], "n/a");
                     cpu_info[4][1] = MyTools.readFile(cpu_info[4][0], "n/a");
@@ -118,6 +138,10 @@ public class MonitoringActivity extends Activity {
                         cpu_info[3][b1] = MyTools.catInt(String.format(cpu_info[3][0], b1 - 1), -21) + "";
                     }
                     publishProgress();
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ignored) {
+                    }
                 }
                 return null;
             }
@@ -240,7 +264,7 @@ class TimeInStateAdapter extends ArrayAdapter<String> {
         if (convertView == null)
             convertView = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.time_in_state_layout, null);
 
-        State state = new State(stats.get(position++));
+        State state = new State(stats.get(position));
 
         TextView freq = (TextView) convertView.findViewById(R.id.freqDisplay);
         TextView perc = (TextView) convertView.findViewById(R.id.perc);

@@ -136,28 +136,30 @@ public class MiscFragment extends Fragment {
         } catch (Exception e) {
             tmp0 = "n/a";
         }
-        StringBuffer tmp = new StringBuffer(tmp0).delete(0, tmp0.indexOf('[') + 1);
-        tmp = tmp.delete(tmp0.indexOf(']') - tmp0.indexOf('[') - 1, tmp0.length());
-        tmp0 = new String(tmp);
-        ArrayList<String> sched_list = new ArrayList<String>();
-        Collections.addAll(sched_list, AVAIL_SCHED);
-        try {
-            spinner1.setSelection(sched_list.indexOf(tmp0));
-        } catch (Exception e) {
-            MyTools.longToast(getActivity(), "current_io_sched: " + e.toString());
-            spinner1.setVisibility(View.GONE);
-        }
+        if (!tmp0.equals("n/a"))
+            try {
+                StringBuffer tmp = new StringBuffer(tmp0).delete(0, tmp0.indexOf('[') + 1);
+                tmp = tmp.delete(tmp0.indexOf(']') - tmp0.indexOf('[') - 1, tmp0.length());
+                tmp0 = new String(tmp);
+                ArrayList<String> sched_list = new ArrayList<String>();
+                Collections.addAll(sched_list, AVAIL_SCHED);
+                spinner1.setSelection(sched_list.indexOf(tmp0));
+            } catch (Exception e) {
+                MyTools.longToast(getActivity(), "error_io_sched: " + e.toString());
+                MyTools.longToast(getActivity(), "value: " + tmp0);
+                spinner1.setVisibility(View.GONE);
+            }
         try {
             readAhead_field.setText(MyTools.readFile(Library.READ_AHEAD_BUFFER_PATH));
         } catch (Exception e) {
-            MyTools.longToast(getActivity(), "readAhead: " + e.toString());
+            MyTools.longToast(getActivity(), "error_readAhead: " + e.toString());
             readAhead_field.setText("n/a");
         }
 
         try {
             thrott_field.setText(MyTools.readFile(Library.MSM_THERMAL_PATH));
         } catch (Exception e) {
-            MyTools.longToast(getActivity(), "msm_thermal: " + e.toString());
+            MyTools.longToast(getActivity(), "error_msm_thermal: " + e.toString());
             thrott_field.setText("n/a");
         }
 

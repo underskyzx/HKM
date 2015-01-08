@@ -248,29 +248,13 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void activityDelayed(final Intent intent, final int delay) {
-        new AsyncTask<Void, Void, Void>() {
-
+        mDrawerLayout.closeDrawer(mDrawerList);
+        findViewById(R.id.cpuGovernorButton).postDelayed(new Runnable() {
             @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                mDrawerLayout.closeDrawer(mDrawerList);
-            }
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                try {
-                    Thread.sleep(delay);
-                } catch (InterruptedException ignored) {
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
+            public void run() {
                 startActivity(intent);
             }
-        }.execute();
+        }, delay);
     }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -290,10 +274,10 @@ public class MainActivity extends FragmentActivity {
                         if (!new File("/sys/kernel/msm_mpdecision").exists())
                             activityDelayed(new Intent(getApplicationContext(), ProfilesActivity.class), delay);
                         else
-                            MyTools.toast(getApplicationContext(), "Not available for hellsCore b49 and up.");
+                            MyTools.toast(getApplicationContext(), "Currently not available");
                         break;
                     case 8:
-                        activityDelayed(new Intent(getApplicationContext(), MonitoringActivity.class), delay);
+                        startActivity(new Intent(getApplicationContext(), MonitoringActivity.class)/*, delay*/);
                         break;
                 }
             }

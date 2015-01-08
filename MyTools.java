@@ -36,8 +36,7 @@ public class MyTools {
         try {
             InputMethodManager inputMethodManager = (InputMethodManager) activity
                     .getSystemService(Activity.INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus()
-                    .getWindowToken(), 0);
+            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
         } catch (Exception ignored) {
         }
     }
@@ -105,28 +104,14 @@ public class MyTools {
         return readFile(fp).split(delim);
     }
 
-    public static String readFile(String fp) throws FileNotFoundException, IOException {
+    public static String readFile(String fp) throws IOException {
         File f = new File(fp);
         if (f.exists() && f.isFile()) {
             if (f.canRead()) {
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
                 return bufferedReader.readLine();
             } else {
-                File filesDir = new File(dataDir + "Files");
-                if (!filesDir.exists() && !filesDir.isDirectory()) {
-                    filesDir.mkdir();
-                }
-                File dump = new File(filesDir.toString() + "dump.bin");
-                if (!dump.exists()) {
-                    dump.createNewFile();
-                }
-                Shell.SU.run("cat " + f.toString() + " > " + dump.toString());
-                Shell.SU.run("chmod 666 " + f.toString());
-
-                if (dump.exists() && dump.isFile())
-                    return readDump(dump.toString());
-                else
-                    throw new IOException();
+                throw new IOException();
             }
         } else {
             throw new FileNotFoundException();
@@ -145,6 +130,7 @@ public class MyTools {
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
             String value = bufferedReader.readLine();
+            bufferedReader.close();
             return Integer.parseInt(value);
         } catch (Exception e) {
             return errorCode;

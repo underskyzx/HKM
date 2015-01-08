@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.themike10452.hellscorekernelmanager.Blackbox.Blackbox;
+import com.themike10452.hellscorekernelmanager.Blackbox.Library;
 
 public class BaseActivity extends Activity {
 
@@ -38,6 +40,7 @@ public class BaseActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
+        final SharedPreferences preferences = getSharedPreferences("SharedPrefs", MODE_PRIVATE);
         String kernel;
         try {
             kernel = MyTools.readFile("/proc/version");
@@ -51,9 +54,9 @@ public class BaseActivity extends Activity {
             } catch (Throwable ignored) {
                 b = false;
             }
-            if (b) {
+            if (b && !preferences.getBoolean("hide_enforcingDialog", false)) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                Dialog d = builder.setPositiveButton("Take me to PlayStore", new DialogInterface.OnClickListener() {
+                Dialog d = builder.setPositiveButton("Go to PlayStore", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -62,6 +65,13 @@ public class BaseActivity extends Activity {
                         finish();
                     }
                 })
+                        .setNegativeButton("Hide", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                preferences.edit().putBoolean("hide_enforcingDialog", true).apply();
+                                load();
+                            }
+                        })
                         .setNeutralButton("Continue", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -128,6 +138,13 @@ public class BaseActivity extends Activity {
     }
 
     private void load() {
+        if (Build.DEVICE.trim().equalsIgnoreCase("hammerhead")) {
+            Library.GPU_AVAIL_FREQ_PATH = Library.GPU_AVAIL_FREQ_PATH_HAMMERHEAD;
+            Library.GPU_MAX_CLK_PATH = Library.GPU_MAX_CLK_PATH_HAMMERHEAD;
+            Library.GPU_POLICY_PATH = Library.GPU_POLICY_PATH_HAMMERHEAD;
+            Library.GPU_GOV_PATH = Library.GPU_GOV_PATH_HAMMERHEAD;
+            Library.MSM_THERMAL_PATH = Library.MSM_THERMAL_PATH_HAMMERHEAD;
+        }
         Intent i = new Intent(this, MainActivity.class);
         new ProgressTask(this, i).execute();
     }

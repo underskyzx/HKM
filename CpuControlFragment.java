@@ -69,8 +69,7 @@ public class CpuControlFragment extends Fragment {
                 }
 
                 @Override
-                public void onProgressChanged(SeekBar seekBar,
-                                              int progress, boolean fromUser) {
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     value = (seekBar.getProgress() - voltageSteps / 2)
                             * voltageStepValue;
                     String sign = (seekBar.getProgress() >= voltageSteps / 2) ? "+"
@@ -220,6 +219,7 @@ public class CpuControlFragment extends Fragment {
                     .show();
         }
     };
+    private boolean keepLiveMinFreq = false;
     private Switch switch_scroff_single_core;
     private Boolean susfUnlocked;
     private View.OnClickListener suspendFreqButtonListener = new View.OnClickListener() {
@@ -356,11 +356,12 @@ public class CpuControlFragment extends Fragment {
     private final SeekBar.OnSeekBarChangeListener minfreqListener = new SeekBar.OnSeekBarChangeListener() {
 
         @Override
-        public void onProgressChanged(SeekBar seekBar, int progress,
-                                      boolean fromUser) {
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             minfreqDisplay.setText(scaleDown(AVAIL_FREQ[MIN_FREQ.getProgress()]));
             if (MAX_FREQ.getProgress() < MIN_FREQ.getProgress())
                 MAX_FREQ.setProgress(MIN_FREQ.getProgress());
+
+            keepLiveMinFreq = !fromUser;
         }
 
         @Override
@@ -497,7 +498,7 @@ public class CpuControlFragment extends Fragment {
                                 .setPositiveButton(getString(R.string.button_getBusybox), new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
-                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Library.stericson_busybox)));
+                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Library.busybox_onRails)));
                                         EasyTracker easyTracker = EasyTracker.getInstance(getActivity());
                                         easyTracker.send(MapBuilder
                                                         .createEvent("Busybox not found",
@@ -740,11 +741,11 @@ public class CpuControlFragment extends Fragment {
         }
 
         maxfreqDisplay.setText(scaleDown(CURRENT_MAX_FREQ));
-        minfreqDisplay.setText(scaleDown(CURRENT_MIN_FREQ));
+        //minfreqDisplay.setText(scaleDown(CURRENT_MIN_FREQ));
 
         for (int i = 0; i < AVAIL_FREQ.length; i++) {
-            if (CURRENT_MIN_FREQ.trim().contains(AVAIL_FREQ[i].trim()))
-                MIN_FREQ.setProgress(i);
+            //if (CURRENT_MIN_FREQ.trim().contains(AVAIL_FREQ[i].trim()))
+            //MIN_FREQ.setProgress(i);
 
             if (CURRENT_MAX_FREQ.trim().contains(AVAIL_FREQ[i].trim()))
                 MAX_FREQ.setProgress(i);
@@ -780,7 +781,8 @@ public class CpuControlFragment extends Fragment {
             boostedCpusDisplay.setText(str);
             boostedCpusDisplay.setContentDescription(str);
             boostedCpusButton.setContentDescription(Library.BOOSTED_CPUS_PATH);
-        } catch (Exception e) {
+            ((RelativeLayout.LayoutParams) view.findViewById(R.id.boostedCpusButton).getLayoutParams()).addRule(RelativeLayout.ALIGN_END, R.id.minCpusButton);
+        } catch (IOException e) {
             try {
                 String boost_enabled = MyTools.readFile(Library.TOUCH_BOOST_PATH).trim();
                 ((Switch) view.findViewById(R.id.switch_touchBoost)).setChecked(boost_enabled.equals("1"));
@@ -803,8 +805,14 @@ public class CpuControlFragment extends Fragment {
                     }
                 });
             } catch (Exception ignored) {
+                ((RelativeLayout.LayoutParams) view.findViewById(R.id.separator5).getLayoutParams()).addRule(RelativeLayout.ALIGN_TOP, R.id.maxCpusDisplay);
+                view.findViewById(R.id.textView10).setVisibility(View.GONE);
+                view.findViewById(R.id.separator4).setVisibility(View.GONE);
+                boostedCpusButton.setVisibility(View.GONE);
+                boostedCpusDisplay.setVisibility(View.GONE);
                 boostedCpusDisplay.setText("n/a");
                 boostedCpusDisplay.setContentDescription("null");
+                boostedCpusButton.setContentDescription("null");
             }
 
         }
@@ -910,6 +918,40 @@ public class CpuControlFragment extends Fragment {
             refreshAll();
         }
 
+        if (!keepLiveMinFreq)
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    keepLiveMinFreq = true;
+                    while (keepLiveMinFreq) {
+                        try {
+                            String CURRENT_MIN_FREQ;
+                            try {
+                                CURRENT_MIN_FREQ = MyTools.readFile(Library.MIN_FREQ0_PATH.trim());
+                            } catch (Exception e) {
+                                CURRENT_MIN_FREQ = "n/a";
+                            }
+
+                            final String res = CURRENT_MIN_FREQ;
+
+                            minfreqDisplay.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    minfreqDisplay.setText(scaleDown(res));
+
+                                    for (int i = 0; i < AVAIL_FREQ.length; i++)
+                                        if (res.trim().contains(AVAIL_FREQ[i].trim()))
+                                            MIN_FREQ.setProgress(i);
+                                }
+                            });
+
+                            Thread.sleep(500);
+                        } catch (InterruptedException ignored) {
+                        }
+                    }
+                }
+            }).start();
+
     }
 
     private void init_Voltages() {
@@ -962,6 +1004,10 @@ public class CpuControlFragment extends Fragment {
                 tmpSoffMax2 = scaleUp(screenOffMaxDisplay.getText().toString());
             }
 
+            String soffSC = null;
+            if (switch_scroff_single_core != null)
+                soffSC = MyTools.parseIntFromBoolean(switch_scroff_single_core.isChecked());
+
             String[] values = new String[]{
                     cpuGovDisplay.getText().toString(),
                     cpuGovDisplay.getText().toString(),
@@ -983,6 +1029,7 @@ public class CpuControlFragment extends Fragment {
                     maxCpusDisplay.getText().toString(),
                     MyTools.parseIntFromBoolean(((Switch) view.findViewById(R.id.switch_touchBoost)).isChecked()),
                     boostedCpusDisplay.getContentDescription().toString().contains("#") ? null : boostedCpusDisplay.getContentDescription().toString(),
+                    soffSC,
                     tmpSusf,
                     tmpSoffMax1,
                     tmpSoffMax2,
@@ -1029,6 +1076,7 @@ public class CpuControlFragment extends Fragment {
                     maxCpusDisplay.getContentDescription().toString(),
                     view.findViewById(R.id.switch_touchBoost).getVisibility() == View.VISIBLE ? view.findViewById(R.id.switch_touchBoost).getContentDescription().toString() : null,
                     boostedCpusButton.getContentDescription().toString(),
+                    Library.SCREEN_OFF_SINGLE_CORE_PATH,
                     suspendFreqDisplay.getContentDescription().toString(),
                     Library.SCREEN_OFF_MAX_STATE,
                     Library.SCREEN_OFF_MAX_FREQ,
